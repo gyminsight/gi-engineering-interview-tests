@@ -1,6 +1,12 @@
 # Instructions
+For this project, you'll want Visual Studio Code (or full Visual Studio, if you have it) and Postman.
+
+You should fork the project to your own Github account, and perform the changes/additions on that fork.
+
+Once completed, you can initiate a pull request back to this repository.  We will then setup a follow-up video interview to screen-share the project, and review your changes with you.
+
 ## Overview
-This project provides the skeleton of a Gym management REST web application using SQLite and Dapper. The database is prepopulated with the following entities:
+This project provides the skeleton of a "Gym Management" REST web application using SQLite and Dapper. The database is prepopulated with the following entities:
 * __location__ - A table containing gym locations.
 * __account__ - A table containing gym membership accounts. There is a many-to-one relationship between accounts and locations.
 * __member__ - A table containing the members of accounts.  There is a many-to-one relationship between members and accounts.
@@ -20,4 +26,3 @@ Verify your endpoints work by using Postman (https://www.postman.com/downloads/)
 5. Add an endpoint to the accounts controller that will delete all members of a specified account except the "primary" member.
 6. Document any recommendations on table indexes.
 7. Document any recommendations on improving the structure or maintainability of the code.
-
