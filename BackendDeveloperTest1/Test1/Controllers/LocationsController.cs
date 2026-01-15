@@ -35,7 +35,9 @@ SELECT
     City,
     Locale,
     PostalCode
-FROM location;";
+FROM location
+/**SELECT COUNT(*) FROM location WHERE AccountStatus < 3 **/
+;";
 
             var builder = new SqlBuilder();
 
@@ -181,3 +183,9 @@ INSERT INTO location (
         }
     }
 }
+
+
+
+// location should be attached to accounts
+// if an account can be used at multiple locations, then accounts should not be attached to location
+// members of accounts

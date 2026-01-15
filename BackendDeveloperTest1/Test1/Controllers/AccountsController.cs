@@ -145,7 +145,7 @@ INSERT INTO account (
             if (count == 1)
                 return Ok();
             else
-                return BadRequest("Unable to add accounts");
+                return BadRequest("Unable to add account");
         }
 
         // DELETE: api/accounts/{Guid}
@@ -155,7 +155,10 @@ INSERT INTO account (
             await using var dbContext = await _sessionFactory.CreateContextAsync(cancellationToken)
                 .ConfigureAwait(false);
 
-            const string sql = "DELETE FROM account WHERE Guid = @Guid;";
+            const string sql = @"
+DELETE FROM account WHERE LocationUid = @Guid;
+DELETE FROM location WHERE UID = @Guid;
+";
 
             var builder = new SqlBuilder();
 
@@ -172,7 +175,7 @@ INSERT INTO account (
             if (count == 1)
                 return Ok();
             else
-                return BadRequest("Unable to delete accounts");
+                return BadRequest("Unable to delete account");
         }
 
         // GET /api/accounts/{id}/members
@@ -185,20 +188,19 @@ INSERT INTO account (
 
             const string sql = @"
 SELECT
-    m.Guid,
-    m.FirstName,
-    m.LastName,
-    m.Address,
-    m.City,
-    m.Locale,
-    m.PostalCode,
-    m.Primary,
-    m.JoinedDateUtc,
-    m.CancelDateUtc,
-    m.Cancelled
-FROM member m
-LEFT JOIN account a ON m.AccountUid = a.UID
-WHERE a.Guid = @AccountGuid";
+    member.Guid,
+    member.FirstName,
+    member.LastName,
+    member.Address,
+    member.City,
+    member.Locale,
+    member.PostalCode,
+    member.JoinedDateUtc,
+    member.CancelDateUtc,
+    member.Cancelled
+FROM member
+LEFT JOIN account ON member.AccountUid = account.UID
+WHERE account.Guid = @AccountGuid;";
 
             var builder = new SqlBuilder();
 
