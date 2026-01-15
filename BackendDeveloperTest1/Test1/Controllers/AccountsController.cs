@@ -6,13 +6,14 @@ using Dapper;
 using Test1.Contracts;
 using Test1.Core;
 using Test1.Models;
+using static Test1.Controllers.MembersController;
 
 
 namespace Test1.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AccountsController : ControllerBase
+    public class AccountsController : ControllerBase 
     {
         private readonly ISessionFactory _sessionFactory;
 
@@ -30,15 +31,17 @@ namespace Test1.Controllers
 
             const string sql = @"
 SELECT
-    Guid,
-    Status,
-    PaymentAmount,
-    PeriodStartUtc,
-    PeriodEndUtc,
-    NextBillingUtc,
-    AccountType,
-FROM account;";
-
+    account.Guid,
+    account.Status,
+    account.PaymentAmount,
+    account.PeriodStartUtc,
+    account.PeriodEndUtc,
+    account.NextBillingUtc
+FROM
+    account
+LEFT JOIN
+    location ON account.LocationUid = location.UID;
+";
             var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(sql);
@@ -60,15 +63,17 @@ FROM account;";
 
             const string sql = @"
 SELECT
-     Guid,
-    Status,
-    PaymentAmount,
-    PeriodStartUtc,
-    PeriodEndUtc,
-    NextBillingUtc,
-    AccountType,
-FROM account
-/**where**/;";
+    account.Guid,
+    account.Status,
+    account.PaymentAmount,
+    account.PeriodStartUtc,
+    account.PeriodEndUtc,
+    account.NextBillingUtc
+FROM
+    account
+LEFT JOIN
+    location ON account.LocationUid = location.UID;
+";
 
             var builder = new SqlBuilder();
 
@@ -95,23 +100,23 @@ FROM account
                 .ConfigureAwait(false);
 
             const string sql = @"
-INSERT INTO location (
+INSERT INTO account (
     Guid,
     CreatedUtc,
     Status,
-    PaymentAmount,
-    PendCancel,
     AccountType,
+    PaymentAmount,
+    PendCancel,,
     PeriodStartUtc,
     PeriodEndUtc,
     NextBillingUtc,
 ) VALUES (
     @Guid,
-    @CreatedUtc,
+    @LocationUid,
     @Status,
+    @AccountType,
     @PaymentAmount,
     @PendCancel,
-    @AccountType,
     @PeriodStartUtc,
     @PeriodEndUtc,
     @NextBillingUtc,
@@ -126,7 +131,7 @@ INSERT INTO location (
                 Status = AccountStatusType.GREEN,
                 PaymentAmount = 0.0,
                 PendCancel = false,
-                AccountType = false,
+                AccountType = AccountType.TERM,
                 PeriodStartUtc = DateTime.UtcNow,
                 PeriodEndUtc = DateTime.UtcNow.AddMonths(1),
                 NextBillingUtc = DateTime.UtcNow.AddMonths(1)
@@ -170,6 +175,46 @@ INSERT INTO location (
                 return BadRequest("Unable to delete accounts");
         }
 
+        // GET /api/accounts/{id}/members
+        // get all members associated with an account
+        [HttpGet("{id:Guid}/members")]
+        public async Task<ActionResult<IEnumerable<MemberDto>>> GetAllMembers(Guid id, CancellationToken cancellationToken)
+        {
+            await using var dbContext = await _sessionFactory.CreateContextAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            const string sql = @"
+SELECT
+    m.Guid,
+    m.FirstName,
+    m.LastName,
+    m.Address,
+    m.City,
+    m.Locale,
+    m.PostalCode,
+    m.Primary,
+    m.JoinedDateUtc,
+    m.CancelDateUtc,
+    m.Cancelled
+FROM member m
+LEFT JOIN account a ON m.AccountUid = a.UID
+WHERE a.Guid = @AccountGuid";
+
+            var builder = new SqlBuilder();
+
+            var template = builder.AddTemplate(sql, new
+            {
+                AccountGuid = id
+            });
+
+            var rows = await dbContext.Session.QueryAsync<MemberDto>(template.RawSql, template.Parameters, dbContext.Transaction)
+                .ConfigureAwait(false);
+
+            dbContext.Commit();
+
+            return Ok(rows);
+        }
+
         public class AccountDto 
         {
             public Guid Guid {get;set;}
@@ -179,5 +224,7 @@ INSERT INTO location (
             public string PeriodEndUtc {get;set;}
             public string NextBillingUtc {get;set;}
         }
+
+        
     }
 }
