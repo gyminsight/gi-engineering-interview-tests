@@ -29,18 +29,24 @@ namespace Test1.Controllers
 
             const string sql = @"
 SELECT
-    UID,
-    Guid,
-    Name,
-    Address,
-    City,
-    Locale,
-    PostalCode
-FROM location;";
+    location.UID,
+    location.Guid,
+    location.Name,
+    location.Address,
+    location.City,
+    location.Locale,
+    location.PostalCode,
+    COUNT(Status < @CANCELLED) AS Accounts
+FROM location
+    INNER JOIN account ON account.LocationUid = location.UID
+GROUP BY location.UID;";
 
             var builder = new SqlBuilder();
 
-            var template = builder.AddTemplate(sql);
+            var template = builder.AddTemplate(sql, new
+            { 
+                AccountStatusType.CANCELLED
+            });
 
             var rows = await dbContext.Session.QueryAsync<LocationDto>(template.RawSql, template.Parameters, dbContext.Transaction)
                 .ConfigureAwait(false);
@@ -59,21 +65,27 @@ FROM location;";
 
             const string sql = @"
 SELECT
-    UID,
-    Guid,
-    Name,
-    Address,
-    City,
-    Locale,
-    PostalCode
+    location.UID,
+    location.Guid,
+    location.Name,
+    location.Address,
+    location.City,
+    location.Locale,
+    location.PostalCode,
+    COUNT(Status < @CANCELLED) AS Accounts
 FROM location
-/**where**/;";
+    INNER JOIN account ON account.LocationUid = location.UID
+/**where**/
+GROUP BY location.UID;";
 
             var builder = new SqlBuilder();
 
-            var template = builder.AddTemplate(sql);
+            var template = builder.AddTemplate(sql, new 
+            {
+                AccountStatusType.CANCELLED
+            });
 
-            builder.Where("Guid = @Guid", new
+            builder.Where("location.Guid = @Guid", new
             {
                 Guid = id
             });
@@ -181,6 +193,7 @@ INSERT INTO location (
             public string City {get;set;}
             public string Locale {get;set;}
             public string PostalCode {get;set;}
+            public int Accounts { get;set;}
         }
     }
 }
