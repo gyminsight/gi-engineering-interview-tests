@@ -9,5 +9,6 @@ namespace Test1.Interfaces
         Task<IEnumerable<TEntity>> GetAllAsync(DapperDbContext dbContext);
         Task<bool> DeleteAsync(TEntity entity, DapperDbContext dbContext);
         Task<bool> UpdateAsync(Guid id, TEntity entity, DapperDbContext dbContext);
+        Task<IEnumerable<TEntity>> GetAllByIdAsync(int id, DapperDbContext dbContext);
     }
 }
