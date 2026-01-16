@@ -70,7 +70,7 @@ namespace Test1.Repositories
             return affectedRows > 0;
         }
 
-        public async Task<bool> DeleteAsync(Account entity, DapperDbContext dbContext)
+        public async Task<bool> DeleteAsync(Guid gUid, DapperDbContext dbContext)
         {
 
             const string sql = "DELETE FROM account WHERE Guid = @gUid;";
@@ -79,7 +79,7 @@ namespace Test1.Repositories
 
             var template = builder.AddTemplate(sql, new
             {
-                gUid = entity.Guid
+                gUid = gUid
             });
 
             var affectedRows = await dbContext.Session.ExecuteAsync(template.RawSql, template.Parameters, dbContext.Transaction)

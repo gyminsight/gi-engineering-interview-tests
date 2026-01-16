@@ -29,6 +29,9 @@ builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IRepository<Account>, AccountRepository>();
 builder.Services.AddScoped<IRepository<Member>, MemberRepository>();
 builder.Services.AddScoped<IGetMembersByAccountService, GetMembersByAccountService>();
+builder.Services.AddScoped<IMemberService, MemberService>();
+
+
 
 
 

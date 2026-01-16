@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using Test1.DTOs;
 using Test1.Interfaces;
-using Test1.Services;
-using static Test1.Controllers.LocationsController;
 
 namespace Test1.Controllers
 {
@@ -74,7 +72,7 @@ namespace Test1.Controllers
 
         // POST api/<AccountsController>
         [HttpPost]
-        public async Task<ActionResult<AccountReadDto>> Create([FromBody] AccountCreateDto account, CancellationToken cancellationToken)
+        public async Task<ActionResult> Create([FromBody] AccountCreateDto account, CancellationToken cancellationToken)
         {
             if (account == null)
             {

@@ -19,7 +19,7 @@ namespace Test1.Repositories
                                     LocationUid,
                                     CreatedUtc,
                                     UpdatedUtc,
-                                    Primary,
+                                    'Primary',
                                     JoinedDateUtc,
                                     CancelDateUtc,
                                     FirstName,
@@ -74,15 +74,15 @@ namespace Test1.Repositories
             return affectedRows > 0;
         }
 
-        public async Task<bool> DeleteAsync(Member entity, DapperDbContext dbContext)
+        public async Task<bool> DeleteAsync(Guid gUid, DapperDbContext dbContext)
         {
-            const string sql = "DELETE FROM member WHERE Uid = @Uid;";
+            const string sql = "DELETE FROM member WHERE Guid = @gUid;";
 
             var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(sql, new
             {
-                Uid = entity.Uid
+                gUid = gUid
             });
 
             var affectedRows = await dbContext.Session.ExecuteAsync(template.RawSql, template.Parameters, dbContext.Transaction)
@@ -147,7 +147,7 @@ namespace Test1.Repositories
                                         LocationUid,
                                         CreatedUtc,
                                         UpdatedUtc,
-                                        Primary,
+                                        'Primary',
                                         JoinedDateUtc,
                                         CancelDateUtc,
                                         FirstName,
@@ -179,7 +179,7 @@ namespace Test1.Repositories
                                         LocationUid,
                                         CreatedUtc,
                                         UpdatedUtc,
-                                        Primary,
+                                        'Primary',
                                         JoinedDateUtc,
                                         CancelDateUtc,
                                         FirstName,
@@ -190,7 +190,7 @@ namespace Test1.Repositories
                                         PostalCode,
                                         Cancelled
                                    FROM member
-                                  WHERE Guid = @gUid";
+                                  WHERE Guid = @Guid";
 
             var builder = new SqlBuilder();
 

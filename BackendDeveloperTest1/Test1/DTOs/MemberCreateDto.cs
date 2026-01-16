@@ -2,8 +2,6 @@
 {
     public class MemberCreateDto
     {
-        
-        public int UID { get; set; }
         public uint AccountUid { get; set; }
         public uint LocationUid { get; set; }
         public bool Primary { get; set; }

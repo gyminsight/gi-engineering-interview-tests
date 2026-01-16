@@ -61,8 +61,7 @@ namespace Test1.Services
 
             try
             {
-                var entity = new Account { Guid = gUid };
-                var deleted = await _repository.DeleteAsync(entity, dbContext);
+                var deleted = await _repository.DeleteAsync(gUid, dbContext);
                 dbContext.Commit();
                 return deleted;
             }
