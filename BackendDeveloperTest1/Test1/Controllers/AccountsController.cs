@@ -8,6 +8,7 @@ using Test1.Contracts;
 using Test1.Core;
 using Test1.Models;
 using static Test1.Controllers.LocationsController;
+using static Test1.Controllers.MembersController;
 
 
 namespace Test1.Controllers
@@ -296,6 +297,52 @@ WHERE
                 return Ok();
             else
                 return BadRequest("Unable to update account");
+        }
+
+        // GET: api/accounts/{Guid}/members
+        [HttpGet("{id:Guid}/members")]
+        public async Task<ActionResult<AccountDto>> ListMembers(Guid id, CancellationToken cancellationToken)
+        {
+            await using var dbContext = await _sessionFactory.CreateContextAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            const string sql = @"
+SELECT
+    member.UID,
+    member.Guid,
+    member.AccountUid,
+    member.LocationUid,
+    member.CreatedUtc,
+    member.UpdatedUtc,
+    member.""Primary"",
+    member.JoinedDateUtc,
+    member.CancelDateUtc,
+    member.FirstName,
+    member.LastName,
+    member.Address,
+    member.City,
+    member.Locale,
+    member.PostalCode,
+    member.Cancelled
+FROM member
+    INNER JOIN account ON account.UID = member.AccountUid
+/**where**/;";
+
+            var builder = new SqlBuilder();
+
+            var template = builder.AddTemplate(sql);
+
+            builder.Where("account.Guid = @Guid", new
+            {
+                Guid = id
+            });
+
+            var rows = await dbContext.Session.QueryAsync<MemberDto>(template.RawSql, template.Parameters, dbContext.Transaction)
+                .ConfigureAwait(false);
+
+            dbContext.Commit();
+
+            return Ok(rows); // Returns an HTTP 200 OK status with the data
         }
 
         public class AccountDto
