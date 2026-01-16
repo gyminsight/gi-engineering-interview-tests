@@ -184,7 +184,6 @@ INSERT INTO location (
             public string City {get;set;}
             public string Locale {get;set;}
             public string PostalCode {get;set;}
-            public int UID {get;set; }
             public int NonCancelledAccounts {get;set; }
         }
     }

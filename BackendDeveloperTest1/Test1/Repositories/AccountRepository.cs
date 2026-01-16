@@ -195,9 +195,5 @@ namespace Test1.Repositories
             return (account);
         }
 
-        public Task<IEnumerable<Account>> GetAllByIdAsync(int id, DapperDbContext dbContext)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

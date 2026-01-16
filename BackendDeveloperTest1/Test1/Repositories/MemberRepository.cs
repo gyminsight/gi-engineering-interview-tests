@@ -206,42 +206,5 @@ namespace Test1.Repositories
 
             return (member);
         }
-
-        public async Task<IEnumerable<Member>> GetAllByIdAsync(int accountId, DapperDbContext dbContext)
-        {
-            IEnumerable<Member> membersByAccount;
-
-            const string sql = @"SELECT UID,
-                                        Guid,
-                                        AccountUid,
-                                        LocationUid,
-                                        CreatedUtc,
-                                        UpdatedUtc,
-                                        'Primary',
-                                        JoinedDateUtc,
-                                        CancelDateUtc,
-                                        FirstName,
-                                        LastName,
-                                        Address,
-                                        City,
-                                        Locale,
-                                        PostalCode,
-                                        Cancelled
-                                   FROM member
-                                  WHERE AccountUid = @id;";
-
-            var builder = new SqlBuilder();
-
-            builder.Where("AccountUid = @gUid", new
-            {
-                id = accountId
-            });
-
-            var template = builder.AddTemplate(sql);
-
-            membersByAccount = await dbContext.Session.QueryAsync<Member>(template.RawSql, template.Parameters, dbContext.Transaction);
-
-            return membersByAccount;
-        }
     }
 }

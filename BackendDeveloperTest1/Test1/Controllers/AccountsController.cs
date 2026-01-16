@@ -13,13 +13,15 @@ namespace Test1.Controllers
     public class AccountsController : ControllerBase
     {
         private readonly IAccountService _accountService;
+        private readonly IGetMembersByAccountService _getmembersService;
 
         /// <summary>
         /// Constructor. 
         /// </summary>
-        public AccountsController(IAccountService accountService)
+        public AccountsController(IAccountService accountService, IGetMembersByAccountService getmembersService)
         {
             _accountService = accountService;
+            _getmembersService = getmembersService;
         }
 
         // GET: api/accounts
@@ -44,7 +46,7 @@ namespace Test1.Controllers
         {
             try
             {
-                var results = await _accountService.GetAllMembersByAccountAsync(accountGuid,cancellationToken);
+                var results = await _getmembersService.GetAllMembersByAccountAsync(accountGuid,cancellationToken);
                 return Ok(results);
             }
             catch (Exception ex)
