@@ -3,8 +3,8 @@
     public class MemberUpdateDto
     {
         public Guid Guid { get; set; }
-        public int AccountUid { get; set; }
-        public int LocationUid { get; set; }
+        public Guid AccountGuid { get; set; }
+        public Guid LocationGuid { get; set; }
         public bool Primary { get; set; }
         public DateTime? JoinedDateUtc { get; set; }
         public DateTime? CancelDateUtc { get; set; }

@@ -134,21 +134,23 @@ namespace Test1.Repositories
         {
             IEnumerable<Account> accounts;
 
-            const string sql = @"SELECT   UID,
-                                          LocationUid,
-                                          Guid,
-                                          CreatedUtc,
-                                          UpdatedUtc,
-                                          Status,
-                                          EndDateUtc,
-                                          AccountType,
-                                          PaymentAmount,
-                                          PendCancel,
-                                          PendCancelDateUtc,
-                                          PeriodStartUtc,
-                                          PeriodEndUtc,
-                                          NextBillingUtc
-                                   FROM   account;";
+            const string sql = @"SELECT   a.UID,
+                                          l.Guid AS LocationGuid,
+                                          a.LocationUid,
+                                          a.Guid,
+                                          a.CreatedUtc,
+                                          a.UpdatedUtc,
+                                          a.Status,
+                                          a.EndDateUtc,
+                                          a.AccountType,
+                                          a.PaymentAmount,
+                                          a.PendCancel,
+                                          a.PendCancelDateUtc,
+                                          a.PeriodStartUtc,
+                                          a.PeriodEndUtc,
+                                          a.NextBillingUtc
+                                   FROM   account a
+                                   INNER JOIN Location l on a.LocationUid = l.UID;";
 
             var builder = new SqlBuilder();
 
@@ -163,22 +165,24 @@ namespace Test1.Repositories
         {
             Account account;
 
-            const string sql = @"SELECT   UID,
-                                          LocationUid,
-                                          Guid,
-                                          CreatedUtc,
-                                          UpdatedUtc,
-                                          Status,
-                                          EndDateUtc,
-                                          AccountType,
-                                          PaymentAmount,
-                                          PendCancel,
-                                          PendCancelDateUtc,
-                                          PeriodStartUtc,
-                                          PeriodEndUtc,
-                                          NextBillingUtc
-                                   FROM account
-                                  WHERE Guid = @Guid";
+            const string sql = @"SELECT   a.UID,
+                                          l.Guid AS LocationGuid,
+                                          a.LocationUid,
+                                          a.Guid,
+                                          a.CreatedUtc,
+                                          a.UpdatedUtc,
+                                          a.Status,
+                                          a.EndDateUtc,
+                                          a.AccountType,
+                                          a.PaymentAmount,
+                                          a.PendCancel,
+                                          a.PendCancelDateUtc,
+                                          a.PeriodStartUtc,
+                                          a.PeriodEndUtc,
+                                          a.NextBillingUtc
+                                   FROM   account a
+                                   INNER JOIN Location l on a.LocationUid = l.UID
+                                  WHERE a.Guid = @Guid";
 
             var builder = new SqlBuilder();
 

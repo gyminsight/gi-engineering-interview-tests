@@ -141,23 +141,26 @@ namespace Test1.Repositories
         {
             IEnumerable<Member> members;
 
-            const string sql = @"SELECT Uid,
-                                        Guid,
-                                        AccountUid,
-                                        LocationUid,
-                                        CreatedUtc,
-                                        UpdatedUtc,
-                                        'Primary',
-                                        JoinedDateUtc,
-                                        CancelDateUtc,
-                                        FirstName,
-                                        LastName,
-                                        Address,
-                                        City,
-                                        Locale,
-                                        PostalCode,
-                                        Cancelled
-                                   FROM member;";
+            const string sql = @"SELECT m.Uid,
+                                        m.Guid,
+                                        a.Guid AS AccountGuid,
+                                        l.Guid AS LocationGuid,
+                                        m.CreatedUtc,
+                                        m.UpdatedUtc,
+                                        m.'Primary',
+                                        m.JoinedDateUtc,
+                                        m.CancelDateUtc,
+                                        m.FirstName,
+                                        m.LastName,
+                                        m.Address,
+                                        m.City,
+                                        m.Locale,
+                                        m.PostalCode,
+                                        m.Cancelled
+                                    FROM member m
+                            INNER  JOIN account a ON a.Uid = m.AccountUid
+                            INNER  JOIN location l ON l.Uid = m.LocationUid
+                                   ;";
 
             var builder = new SqlBuilder();
 
@@ -173,24 +176,26 @@ namespace Test1.Repositories
         {
             Member member;
 
-            const string sql = @"SELECT Uid,
-                                        Guid,
-                                        AccountUid,
-                                        LocationUid,
-                                        CreatedUtc,
-                                        UpdatedUtc,
-                                        'Primary',
-                                        JoinedDateUtc,
-                                        CancelDateUtc,
-                                        FirstName,
-                                        LastName,
-                                        Address,
-                                        City,
-                                        Locale,
-                                        PostalCode,
-                                        Cancelled
-                                   FROM member
-                                  WHERE Guid = @Guid";
+            const string sql = @"SELECT m.Uid,
+                                        m.Guid,
+                                        a.Guid AS AccountGuid,
+                                        l.Guid AS LocationGuid,
+                                        m.CreatedUtc,
+                                        m.UpdatedUtc,
+                                        m.'Primary',
+                                        m.JoinedDateUtc,
+                                        m.CancelDateUtc,
+                                        m.FirstName,
+                                        m.LastName,
+                                        m.Address,
+                                        m.City,
+                                        m.Locale,
+                                        m.PostalCode,
+                                        m.Cancelled
+                                    FROM member m
+                            INNER  JOIN account a ON a.Uid = m.AccountUid
+                            INNER  JOIN location l ON l.Uid = m.LocationUid
+                                  WHERE m.Guid = @Guid";
 
             var builder = new SqlBuilder();
 

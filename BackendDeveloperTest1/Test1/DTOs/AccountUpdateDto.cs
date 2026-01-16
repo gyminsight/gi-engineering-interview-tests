@@ -2,8 +2,8 @@
 {
     public class AccountUpdateDto
     {
-        public Guid Guid { get; set; }
-        public uint LocationUid { get; set; }
+        //public Guid Guid { get; set; }
+        public Guid LocationGuid { get; set; }
         public uint Status { get; set; }
         public int AccountType { get; set; }
         public DateTime? PeriodStartUtc { get; set; }

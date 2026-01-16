@@ -2,8 +2,9 @@
 {
     public class Account
     {
-        public int Uid { get; set; }
+        public uint Uid { get; set; }
         public uint LocationUid { get; set; }
+        public Guid LocationGuid { get; set; }
         public Guid Guid { get; set; } 
         public DateTime? CreatedUtc { get; set; }
         public DateTime? UpdatedUtc { get; set; }

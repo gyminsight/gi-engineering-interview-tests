@@ -2,8 +2,8 @@
 {
     public class MemberCreateDto
     {
-        public uint AccountUid { get; set; }
-        public uint LocationUid { get; set; }
+        public Guid AccountGuid { get; set; }
+        public Guid LocationGuid { get; set; }
         public bool Primary { get; set; }
         public DateTime? JoinedDateUtc { get; set; }
         public string FirstName { get; set; }

@@ -14,11 +14,13 @@ namespace Test1.Services
     {
         private readonly IRepository<Account> _repository;
         private readonly ISessionFactory _sessionFactory;
+        private readonly IReadOnlyRepository<Location> _readOnlyRepository;
 
-        public AccountService(IRepository<Account> accountRepository, ISessionFactory session)
+        public AccountService(IRepository<Account> accountRepository, ISessionFactory session, IReadOnlyRepository<Location> readOnlyRepository)
         {
             _repository = accountRepository;
             _sessionFactory = session;
+            _readOnlyRepository = readOnlyRepository;
         }
 
         public async Task<bool> CreateAccountAsync(AccountCreateDto accountCreateDto, CancellationToken cancellationToken)
@@ -28,8 +30,10 @@ namespace Test1.Services
 
             try
             {
+                var location = await _readOnlyRepository.GetByIdAsync(accountCreateDto.LocationGuid, dbContext);
+
                 var entity = new Account { 
-                    LocationUid = accountCreateDto.LocationUid,
+                    LocationUid = location.UID,
                     Guid = Guid.NewGuid(),
                     CreatedUtc = DateTime.UtcNow,
                     UpdatedUtc = DateTime.UtcNow,
@@ -82,8 +86,7 @@ namespace Test1.Services
                 var entity = await _repository.GetByIdAsync(gUid, dbContext);
                 dbContext.Commit();
                 return entity == null ? null : new AccountReadDto { 
-                    Uid = entity.Uid,
-                    LocationUid = entity.LocationUid,
+                    LocationGuid = entity.LocationGuid,
                     Guid = entity.Guid,
                     CreatedUtc = entity.CreatedUtc,
                     UpdatedUtc = entity.UpdatedUtc,
@@ -115,9 +118,8 @@ namespace Test1.Services
                 dbContext.Commit();
                 return entities.ToList().Select(e => new AccountReadDto 
                 {
-                    Uid = e.Uid,
-                    LocationUid = e.LocationUid,
                     Guid = e.Guid,
+                    LocationGuid = e.LocationGuid,
                     CreatedUtc = e.CreatedUtc,
                     UpdatedUtc = e.UpdatedUtc,
                     Status = e.Status,
@@ -145,9 +147,11 @@ namespace Test1.Services
 
             try
             {
+                var location = await _readOnlyRepository.GetByIdAsync(accountUpdateDto.LocationGuid, dbContext);
+
                 var entity = new Account 
                 { 
-                    LocationUid = accountUpdateDto.LocationUid,
+                    LocationUid = location.UID,
                     UpdatedUtc = DateTime.UtcNow,
                     Status = accountUpdateDto.Status,
                     EndDateUtc = accountUpdateDto.EndDateUtc,

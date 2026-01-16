@@ -2,8 +2,7 @@
 {
     public class AccountCreateDto
     {
-        public int Uid { get; set; }
-        public uint LocationUid { get; set; }
+        public Guid LocationGuid { get; set; }
         public uint Status { get; set; }
         public int AccountType { get; set; }
         public DateTime? PeriodStartUtc { get; set; }

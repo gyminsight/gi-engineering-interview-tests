@@ -30,6 +30,7 @@ builder.Services.AddScoped<IRepository<Account>, AccountRepository>();
 builder.Services.AddScoped<IRepository<Member>, MemberRepository>();
 builder.Services.AddScoped<IGetMembersByAccountService, GetMembersByAccountService>();
 builder.Services.AddScoped<IMemberService, MemberService>();
+builder.Services.AddScoped<IReadOnlyRepository<Location>, LocationRepository>();
 
 
 

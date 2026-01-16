@@ -25,10 +25,7 @@ namespace Test1.Services
             dbContext.Commit();
             return members.Select(e => new MemberReadDto
             {
-                Uid = e.Uid,
                 Guid = e.Guid,
-                AccountUid = e.AccountUid,
-                LocationUid = e.LocationUid,
                 CreatedUtc = e.CreatedUtc,
                 UpdatedUtc = e.UpdatedUtc,
                 Primary = e.Primary,

@@ -29,3 +29,6 @@ Test1.Tests/obj
 /BackendDeveloperTest1/Test1/bin/Debug/net10.0
 /BackendDeveloperTest1/Test1/obj
 /BackendDeveloperTest1/Test1.Tests/obj
+*.db-shm
+*.db-shm
+/BackendDeveloperTest1/.vs/Test1.slnx/copilot-chat/5f1326e4/sessions/0825f371-992a-42a9-8f0a-5d421eb6719d

@@ -10,11 +10,15 @@ namespace Test1.Services
     {
         private readonly IRepository<Member> _repository;
         private readonly ISessionFactory _sessionFactory;
+        private readonly IReadOnlyRepository<Location> _readOnlyRepository;
+        private readonly IRepository<Account> _accountRepository;
 
-        public MemberService(IRepository<Member> accountRepository, ISessionFactory session)
+        public MemberService(IRepository<Member> memberRepository, ISessionFactory session, IReadOnlyRepository<Location> readOnlyRepository, IRepository<Account> accountRepository)
         {
-            _repository = accountRepository;
+            _repository = memberRepository;
             _sessionFactory = session;
+            _readOnlyRepository = readOnlyRepository;
+            _accountRepository = accountRepository;
         }
 
         public async Task<bool> CreateMemberAsync(MemberCreateDto member, CancellationToken cancellationToken)
@@ -24,10 +28,14 @@ namespace Test1.Services
 
             try
             {
+                var location = await _readOnlyRepository.GetByIdAsync(member.LocationGuid, dbContext);
+
+                var account = await _accountRepository.GetByIdAsync(member.AccountGuid, dbContext);
+
                 var entity = new Member
                 {
-                    AccountUid = member.AccountUid,
-                    LocationUid = member.LocationUid,
+                    AccountUid = account.Uid,
+                    LocationUid = location.UID,
                     Primary = member.Primary,
                     JoinedDateUtc = member.JoinedDateUtc,
                     FirstName = member.FirstName,
@@ -81,10 +89,9 @@ namespace Test1.Services
                 dbContext.Commit();
                 return entities.Select(e => new MemberReadDto
             {
-                Uid = e.Uid,
                 Guid = e.Guid,
-                AccountUid = e.AccountUid,
-                LocationUid = e.LocationUid,
+                LocationGuid = e.LocationGuid,
+                AccountGuid = e.AccountGuid,
                 CreatedUtc = e.CreatedUtc,
                 UpdatedUtc = e.UpdatedUtc,
                 Primary = e.Primary,
@@ -116,10 +123,9 @@ namespace Test1.Services
                 dbContext.Commit();
                 return entity == null ? null : new MemberReadDto
                 {
-                Uid = entity.Uid,
                 Guid = entity.Guid,
-                AccountUid = entity.AccountUid,
-                LocationUid = entity.LocationUid,
+                LocationGuid = entity.LocationGuid,
+                AccountGuid = entity.AccountGuid,
                 CreatedUtc = entity.CreatedUtc,
                 UpdatedUtc = entity.UpdatedUtc,
                 Primary = entity.Primary,

@@ -4,6 +4,8 @@
     {
         public int Uid { get; set; }
         public Guid Guid { get; set; } 
+        public Guid AccountGuid { get; set; }
+        public Guid LocationGuid { get; set; }
         public uint AccountUid { get; set; }
         public uint LocationUid { get; set; }
         public DateTime? CreatedUtc { get; set; }
