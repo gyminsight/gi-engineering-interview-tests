@@ -38,6 +38,22 @@ namespace Test1.Controllers
 
         }
 
+        // GET: api/accounts
+        [HttpGet("membersByAccounts/{accountGuid:Guid}")]
+        public async Task<ActionResult<IEnumerable<MemberReadDto>>> List(Guid accountGuid, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var results = await _accountService.GetAllMembersByAccountAsync(accountGuid,cancellationToken);
+                return Ok(results);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+        }
+
         // GET api/accounts/5
         [HttpGet("{gUid:Guid}")]
         public async Task<ActionResult<AccountReadDto>> GetById(Guid gUid, CancellationToken cancellationToken)

@@ -11,12 +11,15 @@ namespace Test1.Services
     public class AccountService : IAccountService
     {
         private readonly IRepository<Account> _repository;
+        private readonly IRepository<Member> _repositoryMember;
         private readonly ISessionFactory _sessionFactory;
 
-        public AccountService(IRepository<Account> accountRepository, ISessionFactory session)
+        public AccountService(IRepository<Account> accountRepository, IRepository<Member> memberRepository, ISessionFactory session)
         {
             _repository = accountRepository;
+            _repositoryMember = memberRepository;
             _sessionFactory = session;
+            
         }
 
         public async Task<bool> CreateAccountAsync(AccountCreateDto accountCreateDto, CancellationToken cancellationToken)
@@ -168,6 +171,40 @@ namespace Test1.Services
                 dbContext.Rollback();
                 throw;
             }
+        }
+
+        public async Task<IEnumerable<MemberReadDto>> GetAllMembersByAccountAsync(Guid accountGuid, CancellationToken cancellationToken)
+        {
+            var currentAccount = await GetAccountByIdAsync(accountGuid, cancellationToken);
+
+            await using var dbContext = await _sessionFactory.CreateContextAsync(cancellationToken);
+            
+
+            if (currentAccount != null)
+            {
+                var members = await _repositoryMember.GetAllByIdAsync(currentAccount.Uid, dbContext);
+                dbContext.Commit();
+                return members.ToList().Select(e => new MemberReadDto
+                {
+                    Uid = e.Uid,
+                    Guid = e.Guid,
+                    AccountUid = e.AccountUid,
+                    LocationUid = e.LocationUid,
+                    CreatedUtc = e.CreatedUtc,
+                    UpdatedUtc = e.UpdatedUtc,
+                    Primary = e.Primary,
+                    JoinedDateUtc = e.JoinedDateUtc,
+                    CancelDateUtc = e.CancelDateUtc,
+                    FirstName = e.FirstName,
+                    LastName = e.LastName,
+                    Address = e.Address,
+                    City = e.City,
+                    Locale = e.Locale,
+                    PostalCode = e.PostalCode,
+                    Cancelled = e.Cancelled
+                });
+            }
+            return Enumerable.Empty<MemberReadDto>(); 
         }
     }
 }

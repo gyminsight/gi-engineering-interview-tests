@@ -2,6 +2,7 @@
 using System.Security.Principal;
 using Test1.Contracts;
 using Test1.Core;
+using Test1.DTOs;
 using Test1.Interfaces;
 using Test1.Models;
 
@@ -192,6 +193,11 @@ namespace Test1.Repositories
                 .ConfigureAwait(false);
 
             return (account);
+        }
+
+        public Task<IEnumerable<Account>> GetAllByIdAsync(int id, DapperDbContext dbContext)
+        {
+            throw new NotImplementedException();
         }
     }
 }
