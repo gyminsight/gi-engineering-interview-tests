@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using Test1.DTOs;
 using Test1.Interfaces;
+using Serilog;
 
 namespace Test1.Controllers
 {
@@ -26,14 +27,20 @@ namespace Test1.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AccountReadDto>>> List(CancellationToken cancellationToken)
         {
+            //Log.Information("Invoking {Name} on {Controller}",nameof(List),nameof(AccountsController));
             try
             {
                 var results = await _accountService.GetAllAccountsAsync(cancellationToken);
-                return Ok(results);
+                if (results == null || !results.Any())
+                {
+                    return NoContent(); //204 No Content
+                }
+                return Ok(results); //200 OK
             }
             catch(Exception ex)
             {
-                return BadRequest(ex.Message);
+                //Log.Error(ex, "Error in Account Controller List: {ErrorMessage}", ex.Message);
+                return BadRequest(ex.Message); //400 Bad Request
             }
 
         }
@@ -45,7 +52,11 @@ namespace Test1.Controllers
             try
             {
                 var results = await _getmembersService.GetAllMembersByAccountAsync(accountGuid,cancellationToken);
-                return Ok(results);
+                if (results == null || !results.Any())
+                {
+                    return NoContent(); //204 No Content
+                }
+                return Ok(results); //200 OK
             }
             catch (Exception ex)
             {
@@ -58,15 +69,17 @@ namespace Test1.Controllers
         [HttpGet("{gUid:Guid}")]
         public async Task<ActionResult<AccountReadDto>> GetById(Guid gUid, CancellationToken cancellationToken)
         {
-            var result = await _accountService.GetAccountByIdAsync(gUid, cancellationToken);
+            try
+            {
+                var result = await _accountService.GetAccountByIdAsync(gUid, cancellationToken);
 
-            if (result == null)
-            {
-                return NotFound();
+                if (result == null)
+                    return NotFound(); // 404 Not Found
+                return Ok(result); // 200 OK
             }
-            else
+            catch (Exception ex)
             {
-                return Ok(result);
+                return BadRequest(ex.Message);
             }
         }
 
@@ -74,73 +87,81 @@ namespace Test1.Controllers
         [HttpPost]
         public async Task<ActionResult> Create([FromBody] AccountCreateDto account, CancellationToken cancellationToken)
         {
-            if (account == null)
+            try
             {
-                return BadRequest();
-            }
+                if (account == null)
+                    return BadRequest("Account model is empty"); // 400 Bad Request
 
-            var created = await _accountService.CreateAccountAsync(account, cancellationToken);
-            if (!created)
+                var created = await _accountService.CreateAccountAsync(account, cancellationToken);
+                if (created)
+                    return Created(); // 201 Created
+                return BadRequest("Account could not be created."); // 400 Bad Request
+            }
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError);
+                return BadRequest(ex.Message);  // 400 Bad Request
             }
-
-            return Created();
-
-            //return CreatedAtAction(nameof(GetById), new { id = account.Uid }, account);
         }
 
         // PUT api/<AccountsController>/5
         [HttpPut("{gUid:Guid}")]
         public async Task<ActionResult> Update(Guid gUid, [FromBody] AccountUpdateDto account, CancellationToken cancellationToken)
         {
-            if (account == null)
+            try
             {
-                return BadRequest();
-            }
+                if (account == null)
+                    return BadRequest("Account model is empty");
 
-            //if (!string.Equals(id, account.Uid, StringComparison.OrdinalIgnoreCase))
-            //{
-            //    return BadRequest("Route id and customer.CustomerID must match.");
-            //}
-            if (gUid != account.Guid)
+                if (gUid != account.Guid)
+                    return BadRequest("Route id and account uUid must match."); // 400 Bad Request
+
+                var updated = await _accountService.UpdateAccountAsync(gUid, account, cancellationToken);
+                if (!updated)
+                    return NotFound(); // 404 Not Found
+
+                return NoContent(); // 204 No Content
+            }
+            catch (Exception ex)
             {
-                return BadRequest("Route id and account uUid must match.");
+                return BadRequest(ex.Message); // 400 Bad Request
             }
-
-            var updated = await _accountService.UpdateAccountAsync(gUid, account, cancellationToken);
-            if (!updated)
-            {
-                return NotFound();
-            }
-
-            return NoContent();
         }
 
         // DELETE api/<AccountsController>/5
         [HttpDelete("{gUid:Guid}")]
         public async Task<ActionResult<AccountReadDto>> DeleteById(Guid gUid, CancellationToken cancellationToken)
         {
-            var deleted = await _accountService.DeleteAccountAsync(gUid, cancellationToken);
-            if (!deleted)
+            try
             {
-                return NotFound();
-            }
+                var deleted = await _accountService.DeleteAccountAsync(gUid, cancellationToken);
+                if (deleted)
+                    return NoContent(); // 204 No Content
 
-            return NoContent();
+                return NotFound(); // 404 Not Found
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message); // 400 Bad Request
+            }
         }
 
         // DELETE api/<AccountsController>/5
         [HttpDelete("delete/nonprimary/{gUid:Guid}")]
         public async Task<ActionResult> DeleteNonPrimary(Guid gUid, CancellationToken cancellationToken)
         {
-            var deleted = await _accountService.DeleteNonPrimaryMembersAsync(gUid, cancellationToken);
-            if (!deleted)
+
+            try
             {
-                return NotFound();
+                var deleted = await _accountService.DeleteNonPrimaryMembersAsync(gUid, cancellationToken);
+                if (deleted)
+                    return NoContent();//   204 No Content
+                return NotFound();// 404 Not Found
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message); // 400 Bad Request
             }
 
-            return NoContent();
         }
 
     }
