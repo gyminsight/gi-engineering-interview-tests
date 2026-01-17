@@ -10,6 +10,12 @@ namespace Test1.Repositories
 {
     public class MemberRepository : IMemberRepository
     {
+        /// <summary>
+        /// Adds a new member record to the database.
+        /// </summary>
+        /// <param name="entity">The member entity to be added.</param>
+        /// <param name="dbContext">The database context containing the session and transaction.</param>
+        /// <returns>True if the member was successfully inserted, false otherwise.</returns>
         public async Task<bool> AddAsync(Member entity, DapperDbContext dbContext)
         {
             try
@@ -81,6 +87,12 @@ namespace Test1.Repositories
             }
         }
 
+        /// <summary>
+        /// Deletes a member record from the database by its unique identifier.
+        /// </summary>
+        /// <param name="gUid">The unique identifier of the member to delete.</param>
+        /// <param name="dbContext">The database context containing the session and transaction.</param>
+        /// <returns>True if the member was successfully deleted, false otherwise.</returns>
         public async Task<bool> DeleteAsync(Guid gUid, DapperDbContext dbContext)
         {
 
@@ -106,6 +118,13 @@ namespace Test1.Repositories
             }
         }
 
+        /// <summary>
+        /// Updates an existing member record in the database.
+        /// </summary>
+        /// <param name="gUid">The unique identifier of the member to update.</param>
+        /// <param name="entity">The member entity containing the updated information.</param>
+        /// <param name="dbContext">The database context containing the session and transaction.</param>
+        /// <returns>True if the member was successfully updated, false if entity is null or no rows were affected.</returns>
         public async Task<bool> UpdateAsync(Guid gUid, Member entity, DapperDbContext dbContext)
         {
             if (entity == null) return false;
@@ -159,6 +178,11 @@ namespace Test1.Repositories
             }
         }
 
+        /// <summary>
+        /// Retrieves all member records from the database.
+        /// </summary>
+        /// <param name="dbContext">The database context containing the session and transaction.</param>
+        /// <returns>Enumerable collection of Member entities with all member records from the database.</returns>
         public async Task<IEnumerable<Member>> GetAllAsync(DapperDbContext dbContext)
         {
             try
@@ -201,6 +225,12 @@ namespace Test1.Repositories
             }
         }
 
+        /// <summary>
+        /// Retrieves a specific member record from the database by its unique identifier.
+        /// </summary>
+        /// <param name="gUid">The unique identifier of the member to retrieve.</param>
+        /// <param name="dbContext">The database context containing the session and transaction.</param>
+        /// <returns>Member entity with matching identifier, or null if not found.</returns>
         public async Task<Member> GetByIdAsync(Guid gUid, DapperDbContext dbContext)
         {
             try
@@ -248,6 +278,12 @@ namespace Test1.Repositories
             }
         }
 
+        /// <summary>
+        /// Validates whether a primary member already exists for a specific account.
+        /// </summary>
+        /// <param name="accountGuid">The unique identifier of the account.</param>
+        /// <param name="dbContext">The database context containing the session and transaction.</param>
+        /// <returns>True if a primary member exists for the account, false otherwise.</returns>
         public async Task<bool> ExistingPrimaryMemberByAccountValidation(Guid accountGuid, DapperDbContext dbContext)
         {
             try
@@ -263,6 +299,12 @@ namespace Test1.Repositories
 
         }
 
+        /// <summary>
+        /// Validates whether an account has more than one member.
+        /// </summary>
+        /// <param name="accountGuid">The unique identifier of the account.</param>
+        /// <param name="dbContext">The database context containing the session and transaction.</param>
+        /// <returns>True if the account has more than one member, false if it is the last member.</returns>
         public async Task<bool> LastAccountMemberValidation(Guid accountGuid, DapperDbContext dbContext)
         {
             try
@@ -278,6 +320,12 @@ namespace Test1.Repositories
 
         }
 
+        /// <summary>
+        /// Retrieves all members belonging to a specific account.
+        /// </summary>
+        /// <param name="accountId">The unique identifier of the account.</param>
+        /// <param name="dbContext">The database context containing the session and transaction.</param>
+        /// <returns>Enumerable collection of Member entities for the specified account.</returns>
         public async Task<IEnumerable<Member>> GetAllMembersByAccountAsync(Guid accountId, DapperDbContext dbContext)
         {
             try
@@ -326,6 +374,12 @@ namespace Test1.Repositories
             }
         }
 
+        /// <summary>
+        /// Deletes all non-primary members associated with a specific account.
+        /// </summary>
+        /// <param name="gUid">The unique identifier of the account.</param>
+        /// <param name="dbContext">The database context containing the session and transaction.</param>
+        /// <returns>True if non-primary members were successfully deleted, false otherwise.</returns>
         public async Task<bool> DeleteNonPrimaryMembersAsyncByAccount(Guid gUid, DapperDbContext dbContext)
         {
 

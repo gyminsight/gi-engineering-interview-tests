@@ -10,6 +10,12 @@ namespace Test1.Repositories
 {
     public class AccountRepository : IRepository<Account>
     {
+        /// <summary>
+        /// Adds a new account record to the database.
+        /// </summary>
+        /// <param name="entity">The account entity to be added.</param>
+        /// <param name="dbContext">The database context containing the session and transaction.</param>
+        /// <returns>True if the account was successfully inserted, false otherwise.</returns>
         public async Task<bool> AddAsync(Account entity, DapperDbContext dbContext)
         {
             try
@@ -77,6 +83,12 @@ namespace Test1.Repositories
             }
         }
 
+        /// <summary>
+        /// Deletes an account record from the database by its unique identifier.
+        /// </summary>
+        /// <param name="gUid">The unique identifier of the account to delete.</param>
+        /// <param name="dbContext">The database context containing the session and transaction.</param>
+        /// <returns>True if the account was successfully deleted, false otherwise.</returns>
         public async Task<bool> DeleteAsync(Guid gUid, DapperDbContext dbContext)
         {
             try
@@ -101,6 +113,13 @@ namespace Test1.Repositories
             }
         }
 
+        /// <summary>
+        /// Updates an existing account record in the database.
+        /// </summary>
+        /// <param name="gUid">The unique identifier of the account to update.</param>
+        /// <param name="entity">The account entity containing the updated information.</param>
+        /// <param name="dbContext">The database context containing the session and transaction.</param>
+        /// <returns>True if the account was successfully updated, false if entity is null or no rows were affected.</returns>
         public async Task<bool> UpdateAsync(Guid gUid, Account entity, DapperDbContext dbContext)
         {
             if (entity == null) return false;
@@ -150,6 +169,11 @@ namespace Test1.Repositories
             }
         }
 
+        /// <summary>
+        /// Retrieves all account records from the database.
+        /// </summary>
+        /// <param name="dbContext">The database context containing the session and transaction.</param>
+        /// <returns>Enumerable collection of Account entities with all account records from the database.</returns>
         public async Task<IEnumerable<Account>> GetAllAsync(DapperDbContext dbContext)
         {
             try
@@ -188,6 +212,12 @@ namespace Test1.Repositories
             }
         }
 
+        /// <summary>
+        /// Retrieves a specific account record from the database by its unique identifier.
+        /// </summary>
+        /// <param name="gUid">The unique identifier of the account to retrieve.</param>
+        /// <param name="dbContext">The database context containing the session and transaction.</param>
+        /// <returns>Account entity with matching identifier, or null if not found.</returns>
         public async Task<Account> GetByIdAsync(Guid gUid, DapperDbContext dbContext)
         {
             try

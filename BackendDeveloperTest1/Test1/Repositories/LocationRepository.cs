@@ -11,25 +11,30 @@ namespace Test1.Repositories
 {
     public class LocationRepository : IReadOnlyRepository<Location>
     {
+        /// <summary>
+        /// Retrieves all location records from the database.
+        /// </summary>
+        /// <param name="dbContext">The database context containing the session and transaction.</param>
+        /// <returns>Enumerable collection of Location entities with all location records from the database.</returns>
         public async Task<IEnumerable<Location>> GetAllAsync(DapperDbContext dbContext)
         {
             try
             {
                 const string sql = @" SELECT    l.Guid,
-                                            l.UID,
-                                            l.CreatedUtc,
-                                            l.UpdatedUtc,
-                                            l.Disabled,
-                                            l.EnableBilling,
-                                            l.AccountStatus,
-                                            l.Name,
-                                            l.Address,
-                                            l.City,
-                                            l.Locale,
-                                            l.PostalCode
+                                                l.UID,
+                                                l.CreatedUtc,
+                                                l.UpdatedUtc,
+                                                l.Disabled,
+                                                l.EnableBilling,
+                                                l.AccountStatus,
+                                                l.Name,
+                                                l.Address,
+                                                l.City,
+                                                l.Locale,
+                                                l.PostalCode
 
-                                            FROM location l
-                                            ;";
+                                                FROM location l
+                                                ;";
 
                 var builder = new SqlBuilder();
 
@@ -46,26 +51,32 @@ namespace Test1.Repositories
             }
         }
 
+        /// <summary>
+        /// Retrieves a specific location record from the database by its unique identifier.
+        /// </summary>
+        /// <param name="id">The unique identifier of the location to retrieve.</param>
+        /// <param name="dbContext">The database context containing the session and transaction.</param>
+        /// <returns>Location entity with matching identifier, or null if not found.</returns>
         public async Task<Location> GetByIdAsync(Guid id, DapperDbContext dbContext)
         {
             try
             {
                 const string sql = @" SELECT    l.Guid,
-                                            l.UID,
-                                            l.CreatedUtc,
-                                            l.UpdatedUtc,
-                                            l.Disabled,
-                                            l.EnableBilling,
-                                            l.AccountStatus,
-                                            l.Name,
-                                            l.Address,
-                                            l.City,
-                                            l.Locale,
-                                            l.PostalCode
+                                                l.UID,
+                                                l.CreatedUtc,
+                                                l.UpdatedUtc,
+                                                l.Disabled,
+                                                l.EnableBilling,
+                                                l.AccountStatus,
+                                                l.Name,
+                                                l.Address,
+                                                l.City,
+                                                l.Locale,
+                                                l.PostalCode
 
-                                            FROM location l
-                                            WHERE l.Guid = @Guid
-                                            ;";
+                                                FROM location l
+                                                WHERE l.Guid = @Guid
+                                                ;";
 
                 var builder = new SqlBuilder();
 

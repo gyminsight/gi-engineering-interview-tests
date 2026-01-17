@@ -17,6 +17,13 @@ namespace Test1.Services
         private readonly IReadOnlyRepository<Location> _readOnlyRepository;
         private readonly IMemberRepository _memberRepository;
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="accountRepository">Repository for Account entity operations.</param>
+        /// <param name="session">Factory for creating database session contexts.</param>
+        /// <param name="readOnlyRepository">Read-only repository for Location entity queries.</param>
+        /// <param name="memberRepository">Repository for Member entity operations.</param>
         public AccountService(IRepository<Account> accountRepository, ISessionFactory session, IReadOnlyRepository<Location> readOnlyRepository, IMemberRepository memberRepository)
         {
             _repository = accountRepository;
@@ -25,6 +32,12 @@ namespace Test1.Services
             _memberRepository = memberRepository;
         }
 
+        /// <summary>
+        /// Creates a new account with the provided account data.
+        /// </summary>
+        /// <param name="accountCreateDto">The account data transfer object containing account information.</param>
+        /// <param name="cancellationToken">Cancellation token for the async operation.</param>
+        /// <returns>True if account was successfully created, false otherwise.</returns>
         public async Task<bool> CreateAccountAsync(AccountCreateDto accountCreateDto, CancellationToken cancellationToken)
         {
             await using var dbContext = await _sessionFactory.CreateContextAsync(cancellationToken)
@@ -60,6 +73,12 @@ namespace Test1.Services
             }
         }
 
+        /// <summary>
+        /// Deletes an account and its associated data by unique identifier.
+        /// </summary>
+        /// <param name="gUid">The unique identifier of the account to delete.</param>
+        /// <param name="cancellationToken">Cancellation token for the async operation.</param>
+        /// <returns>True if account was successfully deleted, false otherwise.</returns>
         public async Task<bool> DeleteAccountAsync(Guid gUid, CancellationToken cancellationToken)
         {
             await using var dbContext = await _sessionFactory.CreateContextAsync(cancellationToken)
@@ -78,6 +97,12 @@ namespace Test1.Services
             }
         }
 
+        /// <summary>
+        /// Deletes all non-primary members associated with an account.
+        /// </summary>
+        /// <param name="id">The unique identifier of the account.</param>
+        /// <param name="cancellationToken">Cancellation token for the async operation.</param>
+        /// <returns>True if non-primary members were successfully deleted, false otherwise.</returns>
         public async Task<bool> DeleteNonPrimaryMembersAsync(Guid id, CancellationToken cancellationToken)
         {
             await using var dbContext = await _sessionFactory.CreateContextAsync(cancellationToken)
@@ -96,6 +121,12 @@ namespace Test1.Services
             }
         }
 
+        /// <summary>
+        /// Retrieves a specific account by its unique identifier.
+        /// </summary>
+        /// <param name="gUid">The unique identifier of the account.</param>
+        /// <param name="cancellationToken">Cancellation token for the async operation.</param>
+        /// <returns>AccountReadDto containing account details, or null if account not found.</returns>
         public async Task<AccountReadDto> GetAccountByIdAsync(Guid gUid, CancellationToken cancellationToken)
         {
             await using var dbContext = await _sessionFactory.CreateContextAsync(cancellationToken)
@@ -128,6 +159,11 @@ namespace Test1.Services
             }
         }
 
+        /// <summary>
+        /// Retrieves all accounts.
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token for the async operation.</param>
+        /// <returns>Enumerable collection of AccountReadDto objects containing all accounts.</returns>
         public async Task<IEnumerable<AccountReadDto>> GetAllAccountsAsync(CancellationToken cancellationToken)
         {
             await using var dbContext = await _sessionFactory.CreateContextAsync(cancellationToken);
@@ -160,6 +196,13 @@ namespace Test1.Services
             }
         }
 
+        /// <summary>
+        /// Updates an existing account with the provided account data.
+        /// </summary>
+        /// <param name="gUid">The unique identifier of the account to update.</param>
+        /// <param name="accountUpdateDto">The account data transfer object containing updated account information.</param>
+        /// <param name="cancellationToken">Cancellation token for the async operation.</param>
+        /// <returns>True if account was successfully updated, false otherwise.</returns>
         public async Task<bool> UpdateAccountAsync(Guid gUid, AccountUpdateDto accountUpdateDto, CancellationToken cancellationToken)
         {
             await using var dbContext = await _sessionFactory.CreateContextAsync(cancellationToken)

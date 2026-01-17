@@ -14,6 +14,13 @@ namespace Test1.Services
         private readonly IRepository<Account> _accountRepository;
         private readonly IMemberRepository _repositoryMember;
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="session">Factory for creating database session contexts.</param>
+        /// <param name="readOnlyRepository">Read-only repository for Location entity queries.</param>
+        /// <param name="accountRepository">Repository for Account entity operations.</param>
+        /// <param name="repositoryMember">Repository for Member entity operations.</param>
         public MemberService(ISessionFactory session, IReadOnlyRepository<Location> readOnlyRepository, IRepository<Account> accountRepository, IMemberRepository repositoryMember)
         {
             _sessionFactory = session;
@@ -22,6 +29,13 @@ namespace Test1.Services
             _repositoryMember = repositoryMember;
         }
 
+        /// <summary>
+        /// Creates a new member with the provided member data.
+        /// </summary>
+        /// <param name="member">The member data transfer object containing member information.</param>
+        /// <param name="cancellationToken">Cancellation token for the async operation.</param>
+        /// <returns>True if member was successfully created, false otherwise.</returns>
+        /// <exception cref="PrimaryMemberException">Thrown when attempting to create a primary member when one already exists for the account.</exception>
         public async Task<bool> CreateMemberAsync(MemberCreateDto member, CancellationToken cancellationToken)
         {
             await using var dbContext = await _sessionFactory.CreateContextAsync(cancellationToken)
@@ -69,6 +83,13 @@ namespace Test1.Services
             }
         }
 
+        /// <summary>
+        /// Deletes a member by its unique identifier. Automatically promotes another member to primary if the deleted member was primary.
+        /// </summary>
+        /// <param name="Guid">The unique identifier of the member to delete.</param>
+        /// <param name="cancellationToken">Cancellation token for the async operation.</param>
+        /// <returns>True if member was successfully deleted, false otherwise.</returns>
+        /// <exception cref="LastAccountMemberException">Thrown when attempting to delete the last remaining member of an account.</exception>
         public async Task<bool> DeleteMemberAsync(Guid Guid, CancellationToken cancellationToken)
         {
             await using var dbContext = await _sessionFactory.CreateContextAsync(cancellationToken)
@@ -108,6 +129,11 @@ namespace Test1.Services
             }
         }
 
+        /// <summary>
+        /// Retrieves all members.
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token for the async operation.</param>
+        /// <returns>Enumerable collection of MemberReadDto objects containing all members.</returns>
         public async  Task<IEnumerable<MemberReadDto>> GetAllMembersAsync(CancellationToken cancellationToken)
         {
             await using var dbContext = await _sessionFactory.CreateContextAsync(cancellationToken);
@@ -141,6 +167,12 @@ namespace Test1.Services
             }
         }
 
+        /// <summary>
+        /// Retrieves a specific member by its unique identifier.
+        /// </summary>
+        /// <param name="gUid">The unique identifier of the member.</param>
+        /// <param name="cancellationToken">Cancellation token for the async operation.</param>
+        /// <returns>MemberReadDto containing member details, or null if member not found.</returns>
         public async Task<MemberReadDto> GetMemberByIdAsync(Guid gUid, CancellationToken cancellationToken)
         {
             await using var dbContext = await _sessionFactory.CreateContextAsync(cancellationToken)
@@ -174,6 +206,13 @@ namespace Test1.Services
                 throw;
             }
         }
+
+        /// <summary>
+        /// Retrieves all members belonging to a specific account.
+        /// </summary>
+        /// <param name="accountGuid">The unique identifier of the account.</param>
+        /// <param name="cancellationToken">Cancellation token for the async operation.</param>
+        /// <returns>Enumerable collection of MemberReadDto objects for the specified account.</returns>
         public async Task<IEnumerable<MemberReadDto>> GetAllMembersByAccountAsync(Guid accountGuid, CancellationToken cancellationToken)
         {
             await using var dbContext = await _sessionFactory.CreateContextAsync(cancellationToken)
