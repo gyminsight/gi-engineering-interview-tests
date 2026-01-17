@@ -32,6 +32,12 @@
 
 ## Recommendations for the solution in general:
 
+- We can splitt the project into multiple projects to improve maintainability and separation of concerns. For example:
+  - API Project: Contains controllers and API-related configurations.
+  - Application Project: Contains services, business logic, and DTOs.
+  - Domain Project: Contains domain models and interfaces.
+  - Infrastructure Project: Contains data access implementations, repositories, and database context.
+
 - Install Swagger to improve API documentation and provide a standardized visual interface to consume the different endpoints. This includes defining examples.
 - Create indexes in the database tables following the recommendations of Task No. 6.
 - Implement unit tests using XUnit.
