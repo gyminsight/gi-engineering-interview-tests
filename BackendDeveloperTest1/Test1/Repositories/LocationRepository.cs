@@ -13,8 +13,9 @@ namespace Test1.Repositories
     {
         public async Task<IEnumerable<Location>> GetAllAsync(DapperDbContext dbContext)
         {
-
-            const string sql = @" SELECT    l.Guid,
+            try
+            {
+                const string sql = @" SELECT    l.Guid,
                                             l.UID,
                                             l.CreatedUtc,
                                             l.UpdatedUtc,
@@ -30,19 +31,26 @@ namespace Test1.Repositories
                                             FROM location l
                                             ;";
 
-            var builder = new SqlBuilder();
+                var builder = new SqlBuilder();
 
-            var template = builder.AddTemplate(sql);
+                var template = builder.AddTemplate(sql);
 
-            var rows = await dbContext.Session.QueryAsync<Location>(template.RawSql, template.Parameters, dbContext.Transaction)
-                .ConfigureAwait(false);
+                var rows = await dbContext.Session.QueryAsync<Location>(template.RawSql, template.Parameters, dbContext.Transaction)
+                    .ConfigureAwait(false);
 
-            return rows;
+                return rows;
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         public async Task<Location> GetByIdAsync(Guid id, DapperDbContext dbContext)
         {
-            const string sql = @" SELECT    l.Guid,
+            try
+            {
+                const string sql = @" SELECT    l.Guid,
                                             l.UID,
                                             l.CreatedUtc,
                                             l.UpdatedUtc,
@@ -59,19 +67,24 @@ namespace Test1.Repositories
                                             WHERE l.Guid = @Guid
                                             ;";
 
-            var builder = new SqlBuilder();
+                var builder = new SqlBuilder();
 
-            builder.Where("Guid = @gUid", new
+                builder.Where("Guid = @gUid", new
+                {
+                    Guid = id
+                });
+
+                var template = builder.AddTemplate(sql);
+
+                var row = await dbContext.Session.QueryFirstOrDefaultAsync<Location>(template.RawSql, template.Parameters, dbContext.Transaction)
+                    .ConfigureAwait(false);
+
+                return row;
+            }
+            catch
             {
-                Guid = id
-            });
-
-            var template = builder.AddTemplate(sql);
-
-            var row = await dbContext.Session.QueryFirstOrDefaultAsync<Location>(template.RawSql, template.Parameters, dbContext.Transaction)
-                .ConfigureAwait(false);
-
-            return row;
+                throw;
+            }
         }
     }
 }

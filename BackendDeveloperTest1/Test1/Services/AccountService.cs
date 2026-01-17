@@ -131,9 +131,9 @@ namespace Test1.Services
         public async Task<IEnumerable<AccountReadDto>> GetAllAccountsAsync(CancellationToken cancellationToken)
         {
             await using var dbContext = await _sessionFactory.CreateContextAsync(cancellationToken);
-            
-            //try
-            //{
+
+            try
+            {
                 var entities = await _repository.GetAllAsync(dbContext);
                 dbContext.Commit();
                 return entities.ToList().Select(e => new AccountReadDto 
@@ -152,12 +152,12 @@ namespace Test1.Services
                     PeriodEndUtc = e.PeriodEndUtc,
                     NextBillingUtc = e.NextBillingUtc
                 });
-            //}
-            //catch(Exception ex)
-            //{
-            //    //dbContext.Rollback();
-            //    throw ex;
-            //}
+            }
+            catch 
+            {
+                dbContext.Rollback();
+                throw ;
+            }
         }
 
         public async Task<bool> UpdateAccountAsync(Guid gUid, AccountUpdateDto accountUpdateDto, CancellationToken cancellationToken)

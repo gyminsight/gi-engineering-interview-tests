@@ -12,7 +12,9 @@ namespace Test1.Repositories
     {
         public async Task<bool> AddAsync(Member entity, DapperDbContext dbContext)
         {
-            const string sql = @"
+            try
+            {
+                const string sql = @"
                                 INSERT INTO member (
                                     Guid,
                                     AccountUid,
@@ -47,55 +49,70 @@ namespace Test1.Repositories
                                     @Cancelled
                                 );";
 
-            var builder = new SqlBuilder();
+                var builder = new SqlBuilder();
 
-            var template = builder.AddTemplate(sql, new
+                var template = builder.AddTemplate(sql, new
+                {
+                    Guid = Guid.NewGuid(),
+                    entity.AccountUid,
+                    entity.LocationUid,
+                    CreatedUtc = DateTime.UtcNow,
+                    UpdatedUtc = DateTime.UtcNow,
+                    entity.Primary,
+                    entity.JoinedDateUtc,
+                    entity.CancelDateUtc,
+                    entity.FirstName,
+                    entity.LastName,
+                    entity.Address,
+                    entity.City,
+                    entity.Locale,
+                    entity.PostalCode,
+                    entity.Cancelled
+                });
+
+                var affectedRows = await dbContext.Session.ExecuteAsync(template.RawSql, template.Parameters, dbContext.Transaction)
+                    .ConfigureAwait(false);
+
+                return affectedRows > 0;
+            }
+            catch 
             {
-                Guid = Guid.NewGuid(),
-                entity.AccountUid,
-                entity.LocationUid,
-                CreatedUtc = DateTime.UtcNow,
-                UpdatedUtc = DateTime.UtcNow,
-                entity.Primary,
-                entity.JoinedDateUtc,
-                entity.CancelDateUtc,
-                entity.FirstName,
-                entity.LastName,
-                entity.Address,
-                entity.City,
-                entity.Locale,
-                entity.PostalCode,
-                entity.Cancelled
-            });
-
-            var affectedRows = await dbContext.Session.ExecuteAsync(template.RawSql, template.Parameters, dbContext.Transaction)
-                .ConfigureAwait(false);
-
-            return affectedRows > 0;
+                throw;
+            }
         }
 
         public async Task<bool> DeleteAsync(Guid gUid, DapperDbContext dbContext)
         {
-            const string sql = "DELETE FROM member WHERE Guid = @gUid;";
 
-            var builder = new SqlBuilder();
-
-            var template = builder.AddTemplate(sql, new
+            try
             {
-                gUid = gUid
-            });
+                const string sql = "DELETE FROM member WHERE Guid = @gUid;";
 
-            var affectedRows = await dbContext.Session.ExecuteAsync(template.RawSql, template.Parameters, dbContext.Transaction)
-                .ConfigureAwait(false);
+                var builder = new SqlBuilder();
 
-            return affectedRows > 0;
+                var template = builder.AddTemplate(sql, new
+                {
+                    gUid = gUid
+                });
+
+                var affectedRows = await dbContext.Session.ExecuteAsync(template.RawSql, template.Parameters, dbContext.Transaction)
+                    .ConfigureAwait(false);
+
+                return affectedRows > 0;
+            }
+            catch 
+            {
+                throw;
+            }
         }
 
         public async Task<bool> UpdateAsync(Guid gUid, Member entity, DapperDbContext dbContext)
         {
             if (entity == null) return false;
 
-            const string sql = @"
+            try
+            {
+                const string sql = @"
                            UPDATE member
                               SET   AccountUid = @AccountUid,
                                     LocationUid = @LocationUid,
@@ -112,36 +129,43 @@ namespace Test1.Repositories
                                     Cancelled = @Cancelled
                             WHERE Guid = @gUid;";
 
-            var builder = new SqlBuilder();
-            var template = builder.AddTemplate(sql, new
+                var builder = new SqlBuilder();
+                var template = builder.AddTemplate(sql, new
+                {
+                    entity.AccountUid,
+                    entity.LocationUid,
+                    UpdatedUtc = DateTime.UtcNow,
+                    entity.Primary,
+                    entity.JoinedDateUtc,
+                    entity.CancelDateUtc,
+                    entity.FirstName,
+                    entity.LastName,
+                    entity.Address,
+                    entity.City,
+                    entity.Locale,
+                    entity.PostalCode,
+                    entity.Cancelled,
+                    gUid
+                });
+
+                var affectedRows = await dbContext.Session.ExecuteAsync(template.RawSql, template.Parameters, dbContext.Transaction)
+                   .ConfigureAwait(false);
+
+                return affectedRows > 0;
+            }
+            catch
             {
-                entity.AccountUid,
-                entity.LocationUid,
-                UpdatedUtc = DateTime.UtcNow,
-                entity.Primary,
-                entity.JoinedDateUtc,
-                entity.CancelDateUtc,
-                entity.FirstName,
-                entity.LastName,
-                entity.Address,
-                entity.City,
-                entity.Locale,
-                entity.PostalCode,
-                entity.Cancelled,
-                gUid
-            });
-
-            var affectedRows = await dbContext.Session.ExecuteAsync(template.RawSql, template.Parameters, dbContext.Transaction)
-               .ConfigureAwait(false);
-
-            return affectedRows > 0;
+                throw;
+            }
         }
 
         public async Task<IEnumerable<Member>> GetAllAsync(DapperDbContext dbContext)
         {
-            IEnumerable<Member> members;
+            try
+            {
+                IEnumerable<Member> members;
 
-            const string sql = @"SELECT m.Uid,
+                const string sql = @"SELECT m.Uid,
                                         m.Guid,
                                         a.Guid AS AccountGuid,
                                         l.Guid AS LocationGuid,
@@ -162,21 +186,28 @@ namespace Test1.Repositories
                             INNER  JOIN location l ON l.Uid = m.LocationUid
                                    ;";
 
-            var builder = new SqlBuilder();
+                var builder = new SqlBuilder();
 
-            var template = builder.AddTemplate(sql);
+                var template = builder.AddTemplate(sql);
 
-            members = await dbContext.Session.QueryAsync<Member>(template.RawSql, template.Parameters, dbContext.Transaction)
-                .ConfigureAwait(false);
+                members = await dbContext.Session.QueryAsync<Member>(template.RawSql, template.Parameters, dbContext.Transaction)
+                    .ConfigureAwait(false);
 
-            return (members);
+                return (members);
+            }
+            catch 
+            {
+                throw;
+            }
         }
 
         public async Task<Member> GetByIdAsync(Guid gUid, DapperDbContext dbContext)
         {
-            Member member;
+            try
+            {
+                Member member;
 
-            const string sql = @"SELECT m.Uid,
+                const string sql = @"SELECT m.Uid,
                                         m.Guid,
                                         a.Guid AS AccountGuid,
                                         l.Guid AS LocationGuid,
@@ -197,40 +228,63 @@ namespace Test1.Repositories
                             INNER  JOIN location l ON l.Uid = m.LocationUid
                                   WHERE m.Guid = @Guid";
 
-            var builder = new SqlBuilder();
+                var builder = new SqlBuilder();
 
-            var template = builder.AddTemplate(sql);
+                var template = builder.AddTemplate(sql);
 
-            builder.Where("m.Guid = @Guid", new
+                builder.Where("m.Guid = @Guid", new
+                {
+                    Guid = gUid
+                });
+
+                member = await dbContext.Session.QueryFirstOrDefaultAsync<Member>(template.RawSql, template.Parameters, dbContext.Transaction)
+                    .ConfigureAwait(false);
+
+                return (member);
+            }
+            catch
             {
-                Guid = gUid
-            });
-
-            member = await dbContext.Session.QueryFirstOrDefaultAsync<Member>(template.RawSql, template.Parameters, dbContext.Transaction)
-                .ConfigureAwait(false);
-
-            return (member);
+                throw;
+            }
         }
 
         public async Task<bool> ExistingPrimaryMemberByAccountValidation(Guid accountGuid, DapperDbContext dbContext)
         {
-            var members = await GetAllMembersByAccountAsync(accountGuid, dbContext);
+            try
+            {
+                var members = await GetAllMembersByAccountAsync(accountGuid, dbContext);
 
-            return members.Any(m => m.Primary);
+                return members.Any(m => m.Primary);
+            }
+            catch 
+            {
+                throw;
+            }
+
         }
 
         public async Task<bool> LastAccountMemberValidation(Guid accountGuid, DapperDbContext dbContext)
         {
-            var members = await GetAllMembersByAccountAsync(accountGuid, dbContext);
+            try
+            {
+                var members = await GetAllMembersByAccountAsync(accountGuid, dbContext);
 
-            return members.Count() > 1;
+                return members.Count() > 1;
+            }
+            catch
+            {
+                throw;
+            }
+
         }
 
         public async Task<IEnumerable<Member>> GetAllMembersByAccountAsync(Guid accountId, DapperDbContext dbContext)
         {
-            IEnumerable<Member> membersByAccount;
+            try
+            {
+                IEnumerable<Member> membersByAccount;
 
-            const string sql = @"SELECT m.UID,
+                const string sql = @"SELECT m.UID,
                                         m.Guid,
                                         a.Guid AS AccountGuid,
                                         l.Guid AS LocationGuid,
@@ -253,40 +307,53 @@ namespace Test1.Repositories
                             INNER  JOIN location l ON l.Uid = m.LocationUid
                                   WHERE a.Guid = @id;";
 
-            var builder = new SqlBuilder();
+                var builder = new SqlBuilder();
 
-            builder.Where("a.Guid = @id", new
+                builder.Where("a.Guid = @id", new
+                {
+                    id = accountId
+                });
+
+                var template = builder.AddTemplate(sql);
+
+                membersByAccount = await dbContext.Session.QueryAsync<Member>(template.RawSql, template.Parameters, dbContext.Transaction);
+
+                return membersByAccount;
+            }
+            catch
             {
-                id = accountId
-            });
-
-            var template = builder.AddTemplate(sql);
-
-            membersByAccount = await dbContext.Session.QueryAsync<Member>(template.RawSql, template.Parameters, dbContext.Transaction);
-
-            return membersByAccount;
+                throw;
+            }
         }
 
         public async Task<bool> DeleteNonPrimaryMembersAsyncByAccount(Guid gUid, DapperDbContext dbContext)
         {
-            const string sql = @"DELETE FROM member WHERE Guid IN( 
+
+            try
+            {
+                const string sql = @"DELETE FROM member WHERE Guid IN( 
                                     SELECT m.Guid
                                     FROM member m
                                     INNER  JOIN account a ON a.Uid = m.AccountUid
                                     WHERE a.Guid = @gUid AND m.'Primary' = 0
                                );";
 
-            var builder = new SqlBuilder();
+                var builder = new SqlBuilder();
 
-            var template = builder.AddTemplate(sql, new
+                var template = builder.AddTemplate(sql, new
+                {
+                    gUid = gUid
+                });
+
+                var affectedRows = await dbContext.Session.ExecuteAsync(template.RawSql, template.Parameters, dbContext.Transaction)
+                    .ConfigureAwait(false);
+
+                return affectedRows > 0;
+            }
+            catch 
             {
-                gUid = gUid
-            });
-
-            var affectedRows = await dbContext.Session.ExecuteAsync(template.RawSql, template.Parameters, dbContext.Transaction)
-                .ConfigureAwait(false);
-
-            return affectedRows > 0;
+                throw;
+            }
         }
     }
 }

@@ -117,7 +117,7 @@ namespace Test1.Services
                 var entities = await _repositoryMember.GetAllAsync(dbContext);
                 dbContext.Commit();
                 return entities.Select(e => new MemberReadDto
-            {
+                {
                 Guid = e.Guid,
                 LocationGuid = e.LocationGuid,
                 AccountGuid = e.AccountGuid,
@@ -132,12 +132,12 @@ namespace Test1.Services
                 City = e.City,
                 Locale = e.Locale,
                 PostalCode = e.PostalCode
-            });
+                });
             }
-            catch (Exception ex)
+            catch
             {
                 dbContext.Rollback();
-                throw ex;
+                throw;
             }
         }
 
@@ -176,29 +176,38 @@ namespace Test1.Services
         }
         public async Task<IEnumerable<MemberReadDto>> GetAllMembersByAccountAsync(Guid accountGuid, CancellationToken cancellationToken)
         {
-            await using var dbContext = await _sessionFactory.CreateContextAsync(cancellationToken);
+            await using var dbContext = await _sessionFactory.CreateContextAsync(cancellationToken)
+                .ConfigureAwait(false);
 
-            var members = await _repositoryMember.GetAllMembersByAccountAsync(accountGuid, dbContext);
-
-            dbContext.Commit();
-            return members.Select(e => new MemberReadDto
+            try
             {
-                Guid = e.Guid,
-                AccountGuid = e.AccountGuid,
-                LocationGuid = e.LocationGuid,
-                CreatedUtc = e.CreatedUtc,
-                UpdatedUtc = e.UpdatedUtc,
-                Primary = e.Primary,
-                JoinedDateUtc = e.JoinedDateUtc,
-                CancelDateUtc = e.CancelDateUtc,
-                FirstName = e.FirstName,
-                LastName = e.LastName,
-                Address = e.Address,
-                City = e.City,
-                Locale = e.Locale,
-                PostalCode = e.PostalCode,
-                Cancelled = e.Cancelled
-            });
+                var members = await _repositoryMember.GetAllMembersByAccountAsync(accountGuid, dbContext);
+
+                dbContext.Commit();
+                return members.Select(e => new MemberReadDto
+                {
+                    Guid = e.Guid,
+                    AccountGuid = e.AccountGuid,
+                    LocationGuid = e.LocationGuid,
+                    CreatedUtc = e.CreatedUtc,
+                    UpdatedUtc = e.UpdatedUtc,
+                    Primary = e.Primary,
+                    JoinedDateUtc = e.JoinedDateUtc,
+                    CancelDateUtc = e.CancelDateUtc,
+                    FirstName = e.FirstName,
+                    LastName = e.LastName,
+                    Address = e.Address,
+                    City = e.City,
+                    Locale = e.Locale,
+                    PostalCode = e.PostalCode,
+                    Cancelled = e.Cancelled
+                });
+            }
+            catch
+            {
+                dbContext.Rollback();
+                throw;
+            }
         }
     }
 }
