@@ -8,5 +8,7 @@ namespace Test1.Interfaces
         Task<MemberReadDto> GetMemberByIdAsync(Guid id, CancellationToken cancellationToken);
         Task<bool> CreateMemberAsync(MemberCreateDto member, CancellationToken cancellationToken);
         Task<bool> DeleteMemberAsync(Guid id, CancellationToken cancellationToken);
+        Task<IEnumerable<MemberReadDto>> GetAllMembersByAccountAsync(Guid accountGuid, CancellationToken cancellationToken);
+
     }
 }

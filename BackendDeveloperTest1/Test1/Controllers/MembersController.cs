@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Test1.DTOs;
+using Test1.Exceptions;
 using Test1.Interfaces;
 using Test1.Services;
 
@@ -58,18 +59,30 @@ namespace Test1.Controllers
         [HttpPost]
         public async Task<ActionResult> Create([FromBody] MemberCreateDto member, CancellationToken cancellationToken)
         {
-            if (member == null)
+            try 
             {
-                return BadRequest();
+                if (member == null)
+                {
+                    return BadRequest();
+                }
+
+                var created = await _memberService.CreateMemberAsync(member, cancellationToken);
+                if (!created)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError);
+                }
+
+                return Created();
+            }
+            catch (PrimaryMemberException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
 
-            var created = await _memberService.CreateMemberAsync(member, cancellationToken);
-            if (!created)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
-
-            return Created();
         }
 
         // DELETE api/<MembersController>/5

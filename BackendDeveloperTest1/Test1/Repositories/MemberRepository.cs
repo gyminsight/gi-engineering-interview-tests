@@ -8,7 +8,7 @@ using Test1.Models;
 
 namespace Test1.Repositories
 {
-    public class MemberRepository : IRepository<Member>
+    public class MemberRepository : IMemberRepository
     {
         public async Task<bool> AddAsync(Member entity, DapperDbContext dbContext)
         {
@@ -211,5 +211,98 @@ namespace Test1.Repositories
 
             return (member);
         }
+
+        public async Task<bool> ExistingPrimaryMemberByAccountValidation(Guid accountGuid, DapperDbContext dbContext)
+        {
+            Member member;
+            const string sql = @"SELECT m.Uid,
+                                        m.Guid,
+                                        a.Guid AS AccountGuid,
+                                        m.'Primary'
+
+                                    FROM member m
+                              INNER JOIN account a ON a.Uid = m.AccountUid
+                                   WHERE AccountGuid = @accountGuid AND m.'Primary' = 1";
+
+            var builder = new SqlBuilder();
+
+            var template = builder.AddTemplate(sql);
+
+            builder.Where("AccountGuid = @accountGuid", new
+            {
+                accountGuid = accountGuid
+            });
+
+            member = await dbContext.Session.QueryFirstOrDefaultAsync<Member>(template.RawSql, template.Parameters, dbContext.Transaction)
+                .ConfigureAwait(false);
+
+            return member != null;
+        }
+
+        public async Task<bool> LastAccountMemberValidation(Guid accountGuid, DapperDbContext dbContext)
+        {
+            Member member;
+            const string sql = @"SELECT m.Uid,
+                                        m.Guid,
+                                        a.Guid AS AccountGuid
+
+                                    FROM member m
+                             INNER JOIN account a ON a.Uid = m.AccountUid
+                                   WHERE AccountGuid = @accountGuid";
+
+            var builder = new SqlBuilder();
+
+            var template = builder.AddTemplate(sql);
+
+            builder.Where("AccountGuid = @accountGuid", new
+            {
+                accountGuid = accountGuid
+            });
+
+            member = await dbContext.Session.QueryFirstOrDefaultAsync<Member>(template.RawSql, template.Parameters, dbContext.Transaction)
+                .ConfigureAwait(false);
+
+            return member != null;
+        }
+
+        public async Task<IEnumerable<Member>> GetAllMembersByAccountAsync(Guid accountId, DapperDbContext dbContext)
+        {
+            IEnumerable<Member> membersByAccount;
+
+            const string sql = @"SELECT m.UID,
+                                        m.Guid,
+                                        a.Guid AS AccountGuid,
+                                        l.Guid AS LocationGuid,
+                                        m.CreatedUtc,
+                                        m.UpdatedUtc,
+                                        m.'Primary',
+                                        m.JoinedDateUtc,
+                                        m.CancelDateUtc,
+                                        m.FirstName,
+                                        m.LastName,
+                                        m.Address,
+                                        m.City,
+                                        m.Locale,
+                                        m.PostalCode,
+                                        m.Cancelled
+                                    FROM member m
+                            INNER  JOIN account a ON a.Uid = m.AccountUid
+                            INNER  JOIN location l ON l.Uid = m.LocationUid
+                                  WHERE a.Guid = @id;";
+
+            var builder = new SqlBuilder();
+
+            builder.Where("AccountUid = @gUid", new
+            {
+                id = accountId
+            });
+
+            var template = builder.AddTemplate(sql);
+
+            membersByAccount = await dbContext.Session.QueryAsync<Member>(template.RawSql, template.Parameters, dbContext.Transaction);
+
+            return membersByAccount;
+        }
     }
 }
+

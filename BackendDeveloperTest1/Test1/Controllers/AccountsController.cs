@@ -11,12 +11,12 @@ namespace Test1.Controllers
     public class AccountsController : ControllerBase
     {
         private readonly IAccountService _accountService;
-        private readonly IGetMembersByAccountService _getmembersService;
+        private readonly IMemberService _getmembersService;
 
         /// <summary>
         /// Constructor. 
         /// </summary>
-        public AccountsController(IAccountService accountService, IGetMembersByAccountService getmembersService)
+        public AccountsController(IAccountService accountService, IMemberService getmembersService)
         {
             _accountService = accountService;
             _getmembersService = getmembersService;

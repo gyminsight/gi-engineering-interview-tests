@@ -1,6 +1,7 @@
 ﻿using System;
 using Test1.Contracts;
 using Test1.DTOs;
+using Test1.Exceptions;
 using Test1.Interfaces;
 using Test1.Models;
 
@@ -8,17 +9,17 @@ namespace Test1.Services
 {
     public class MemberService : IMemberService
     {
-        private readonly IRepository<Member> _repository;
         private readonly ISessionFactory _sessionFactory;
         private readonly IReadOnlyRepository<Location> _readOnlyRepository;
         private readonly IRepository<Account> _accountRepository;
+        private readonly IMemberRepository _repositoryMember;
 
-        public MemberService(IRepository<Member> memberRepository, ISessionFactory session, IReadOnlyRepository<Location> readOnlyRepository, IRepository<Account> accountRepository)
+        public MemberService(ISessionFactory session, IReadOnlyRepository<Location> readOnlyRepository, IRepository<Account> accountRepository, IMemberRepository repositoryMember)
         {
-            _repository = memberRepository;
             _sessionFactory = session;
             _readOnlyRepository = readOnlyRepository;
             _accountRepository = accountRepository;
+            _repositoryMember = repositoryMember;
         }
 
         public async Task<bool> CreateMemberAsync(MemberCreateDto member, CancellationToken cancellationToken)
@@ -28,6 +29,13 @@ namespace Test1.Services
 
             try
             {
+                bool primaryAlreadyExist = await _repositoryMember.ExistingPrimaryMemberByAccountValidation(member.AccountGuid, dbContext);
+
+                if (primaryAlreadyExist && member.Primary)
+                {
+                    throw new PrimaryMemberException("There is an existing Primary member for the selected account.");
+                } 
+
                 var location = await _readOnlyRepository.GetByIdAsync(member.LocationGuid, dbContext);
 
                 var account = await _accountRepository.GetByIdAsync(member.AccountGuid, dbContext);
@@ -50,7 +58,7 @@ namespace Test1.Services
                     CreatedUtc = DateTime.UtcNow,
                     UpdatedUtc = DateTime.UtcNow
                 };
-                var added = await _repository.AddAsync(entity, dbContext);
+                var added = await _repositoryMember.AddAsync(entity, dbContext);
                 dbContext.Commit();
                 return added;
             }
@@ -68,7 +76,7 @@ namespace Test1.Services
 
             try
             {
-                var deleted = await _repository.DeleteAsync(Guid, dbContext);
+                var deleted = await _repositoryMember.DeleteAsync(Guid, dbContext);
                 dbContext.Commit();
                 return deleted;
             }
@@ -85,7 +93,7 @@ namespace Test1.Services
 
             try
             {
-                var entities = await _repository.GetAllAsync(dbContext);
+                var entities = await _repositoryMember.GetAllAsync(dbContext);
                 dbContext.Commit();
                 return entities.Select(e => new MemberReadDto
             {
@@ -119,7 +127,7 @@ namespace Test1.Services
 
             try
             {
-                var entity = await _repository.GetByIdAsync(gUid, dbContext);
+                var entity = await _repositoryMember.GetByIdAsync(gUid, dbContext);
                 dbContext.Commit();
                 return entity == null ? null : new MemberReadDto
                 {
@@ -144,6 +152,32 @@ namespace Test1.Services
                 dbContext.Rollback();
                 throw;
             }
+        }
+        public async Task<IEnumerable<MemberReadDto>> GetAllMembersByAccountAsync(Guid accountGuid, CancellationToken cancellationToken)
+        {
+            await using var dbContext = await _sessionFactory.CreateContextAsync(cancellationToken);
+
+            var members = await _repositoryMember.GetAllMembersByAccountAsync(accountGuid, dbContext);
+
+            dbContext.Commit();
+            return members.Select(e => new MemberReadDto
+            {
+                Guid = e.Guid,
+                AccountGuid = e.AccountGuid,
+                LocationGuid = e.LocationGuid,
+                CreatedUtc = e.CreatedUtc,
+                UpdatedUtc = e.UpdatedUtc,
+                Primary = e.Primary,
+                JoinedDateUtc = e.JoinedDateUtc,
+                CancelDateUtc = e.CancelDateUtc,
+                FirstName = e.FirstName,
+                LastName = e.LastName,
+                Address = e.Address,
+                City = e.City,
+                Locale = e.Locale,
+                PostalCode = e.PostalCode,
+                Cancelled = e.Cancelled
+            });
         }
     }
 }

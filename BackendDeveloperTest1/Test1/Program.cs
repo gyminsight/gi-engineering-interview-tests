@@ -27,14 +27,9 @@ Dapper.SqlMapper.AddTypeHandler(MySqlGuidTypeHandler.Default);
 //Registering my own interfaces-classes
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IRepository<Account>, AccountRepository>();
-builder.Services.AddScoped<IRepository<Member>, MemberRepository>();
-builder.Services.AddScoped<IGetMembersByAccountService, GetMembersByAccountService>();
 builder.Services.AddScoped<IMemberService, MemberService>();
 builder.Services.AddScoped<IReadOnlyRepository<Location>, LocationRepository>();
-
-
-
-
+builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 
 var app = builder.Build();
 
