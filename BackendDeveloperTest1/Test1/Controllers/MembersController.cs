@@ -2,7 +2,7 @@
 using Test1.DTOs;
 using Test1.Exceptions;
 using Test1.Interfaces;
-using Test1.Services;
+
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -30,28 +30,29 @@ namespace Test1.Controllers
             try
             {
                 var results = await _memberService.GetAllMembersAsync(cancellationToken);
-                return Ok(results);
+                return Ok(results); //200 OK
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(ex.Message);//400 Bad Request
             }
-
         }
 
         // GET api/<MembersController>/5
         [HttpGet("{gUid:guid}")]
         public async Task<ActionResult<MemberReadDto>> GetById(Guid gUid, CancellationToken cancellationToken)
         {
-            var result = await _memberService.GetMemberByIdAsync(gUid, cancellationToken);
+            try
+            {
+                var result = await _memberService.GetMemberByIdAsync(gUid, cancellationToken);
 
-            if (result == null)
-            {
-                return NotFound();
+                if (result == null)
+                    return NotFound(); //404 Not Found
+                return Ok(result); //200 OK
             }
-            else
+            catch (Exception ex)
             {
-                return Ok(result);
+                return BadRequest(ex.Message); //400 Bad Request
             }
         }
 
@@ -62,25 +63,22 @@ namespace Test1.Controllers
             try 
             {
                 if (member == null)
-                {
-                    return BadRequest();
-                }
+                    return BadRequest("Member model is empty"); //400 Bad Request
 
                 var created = await _memberService.CreateMemberAsync(member, cancellationToken);
-                if (!created)
-                {
-                    return StatusCode(StatusCodes.Status500InternalServerError);
-                }
+                if (created)
+                    return Created(); //201 Created
 
-                return Created();
+                return BadRequest("Member could not be created."); // 400 Bad Request
+
             }
             catch (PrimaryMemberException ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(ex.Message); //400 Bad Request
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(ex.Message); //400 Bad Request
             }
 
         }
@@ -92,16 +90,18 @@ namespace Test1.Controllers
             try
             {
                 var deleted = await _memberService.DeleteMemberAsync(gUid, cancellationToken);
-                if (!deleted)
-                {
-                    return NotFound();
-                }
+                if (deleted)
+                    return NoContent(); //204 No Content
 
-                return NoContent();
+                return NotFound(); //404 Not Found
             }
             catch (LastAccountMemberException ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(ex.Message); //400 Bad Request
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message); //400 Bad Request
             }
 
         }
