@@ -13,9 +13,9 @@ namespace Test1.Models
         public bool Disabled { get; set; }
         public bool EnableBilling { get; set; }
         public int AccountStatus { get; set; }
-        public string? Address { get; set; }
-        public string? City { get; set; }
-        public string? Locale { get; set; }
-        public string? PostalCode { get; set; }
+        public string Address { get; set; }
+        public string City { get; set; }
+        public string Locale { get; set; }
+        public string PostalCode { get; set; }
     }
 }
