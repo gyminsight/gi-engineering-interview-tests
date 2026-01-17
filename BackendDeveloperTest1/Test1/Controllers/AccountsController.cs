@@ -345,6 +345,44 @@ FROM member
             return Ok(rows); // Returns an HTTP 200 OK status with the data
         }
 
+        // DELETE: api/accounts/{Guid}/members
+        [HttpDelete("{id:Guid}/members")]
+        public async Task<ActionResult<AccountDto>> DeleteMembers(Guid id, CancellationToken cancellationToken)
+        {
+            await using var dbContext = await _sessionFactory.CreateContextAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            const string sql = @"
+DELETE
+FROM member
+WHERE
+    member.""Primary"" = 0
+    AND member.AccountUid IN (
+        SELECT
+            account.UID
+        FROM account
+        WHERE
+            account.Guid = @Guid
+);";
+
+            var builder = new SqlBuilder();
+
+            var template = builder.AddTemplate(sql, new
+            {
+                Guid = id
+            });
+
+            var count = await dbContext.Session.ExecuteAsync(template.RawSql, template.Parameters, dbContext.Transaction)
+                .ConfigureAwait(false);
+
+            dbContext.Commit();
+
+            if (count > 0) // There should be 1 or more deletions
+                return Ok();
+            else
+                return BadRequest("Unable to delete member(s)");
+        }
+
         public class AccountDto
         {
             public int? UID { get; }

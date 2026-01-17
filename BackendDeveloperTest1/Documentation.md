@@ -24,3 +24,7 @@ Create a members controller that will list, create, and delete members.
 	- Keeping redundant data about the location inside each member entry *and* each account entry might lead to possible source-of-truth conflicts if a member's location and the member's account's location become different (unless that is somehow intentional). Unless it's intentional, I recommend keeping track of the information only in one place and accessing it by joining queries. If it *is* intentional, I recommend explaining it in documentation.
 	- Using "Primary" as a key in the database is cumbersome and prone to mistakes because "Primary" is a keyword and needs to be escaped every time in order to access the value of the member."Primary" field. I recommend changing the name to something else.
 
+## Task 5:
+Add an endpoint to the accounts controller that will delete all members of a specified account except the "primary" member.
+	- No notes.
+
