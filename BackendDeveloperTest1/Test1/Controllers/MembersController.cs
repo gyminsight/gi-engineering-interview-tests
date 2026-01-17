@@ -16,14 +16,18 @@ namespace Test1.Controllers
         private readonly IMemberService _memberService;
 
         /// <summary>
-        /// Constructor. 
+        /// Constructor.
         /// </summary>
         public MembersController(IMemberService memberService)
         {
             _memberService = memberService;
         }
 
-        // GET: api/<MembersController>
+        /// <summary>
+        /// Retrieves all members.
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token for the async operation.</param>
+        /// <returns>200 OK with list of all members, 400 Bad Request on error.</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MemberReadDto>>> List(CancellationToken cancellationToken)
         {
@@ -38,7 +42,12 @@ namespace Test1.Controllers
             }
         }
 
-        // GET api/<MembersController>/5
+        /// <summary>
+        /// Retrieves a specific member by its unique identifier.
+        /// </summary>
+        /// <param name="gUid">The unique identifier of the member.</param>
+        /// <param name="cancellationToken">Cancellation token for the async operation.</param>
+        /// <returns>200 OK with member details, 404 Not Found if member does not exist, 400 Bad Request on error.</returns>
         [HttpGet("{gUid:guid}")]
         public async Task<ActionResult<MemberReadDto>> GetById(Guid gUid, CancellationToken cancellationToken)
         {
@@ -56,7 +65,12 @@ namespace Test1.Controllers
             }
         }
 
-        // POST api/<MembersController>
+        /// <summary>
+        /// Creates a new member.
+        /// </summary>
+        /// <param name="member">The member data transfer object containing member information.</param>
+        /// <param name="cancellationToken">Cancellation token for the async operation.</param>
+        /// <returns>201 Created on success, 400 Bad Request if member is null, creation fails, or primary member exception occurs.</returns>
         [HttpPost]
         public async Task<ActionResult> Create([FromBody] MemberCreateDto member, CancellationToken cancellationToken)
         {
@@ -83,7 +97,12 @@ namespace Test1.Controllers
 
         }
 
-        // DELETE api/<MembersController>/5
+        /// <summary>
+        /// Deletes a member by its unique identifier.
+        /// </summary>
+        /// <param name="gUid">The unique identifier of the member to delete.</param>
+        /// <param name="cancellationToken">Cancellation token for the async operation.</param>
+        /// <returns>204 No Content on success, 404 Not Found if member does not exist, 400 Bad Request if member is the last account member or on error.</returns>
         [HttpDelete("{gUid:guid}")]
         public async Task<ActionResult> DeleteById(Guid gUid, CancellationToken cancellationToken)
         {
