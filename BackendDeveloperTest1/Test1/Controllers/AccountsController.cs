@@ -130,5 +130,18 @@ namespace Test1.Controllers
             return NoContent();
         }
 
+        // DELETE api/<AccountsController>/5
+        [HttpDelete("delete/nonprimary/{gUid:Guid}")]
+        public async Task<ActionResult> DeleteNonPrimary(Guid gUid, CancellationToken cancellationToken)
+        {
+            var deleted = await _accountService.DeleteNonPrimaryMembersAsync(gUid, cancellationToken);
+            if (!deleted)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
+        }
+
     }
 }

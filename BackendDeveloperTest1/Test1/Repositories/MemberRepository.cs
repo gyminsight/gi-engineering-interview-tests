@@ -266,6 +266,28 @@ namespace Test1.Repositories
 
             return membersByAccount;
         }
+
+        public async Task<bool> DeleteNonPrimaryMembersAsyncByAccount(Guid gUid, DapperDbContext dbContext)
+        {
+            const string sql = @"DELETE FROM member WHERE Guid IN( 
+                                    SELECT m.Guid
+                                    FROM member m
+                                    INNER  JOIN account a ON a.Uid = m.AccountUid
+                                    WHERE a.Guid = @gUid AND m.'Primary' = 0
+                               );";
+
+            var builder = new SqlBuilder();
+
+            var template = builder.AddTemplate(sql, new
+            {
+                gUid = gUid
+            });
+
+            var affectedRows = await dbContext.Session.ExecuteAsync(template.RawSql, template.Parameters, dbContext.Transaction)
+                .ConfigureAwait(false);
+
+            return affectedRows > 0;
+        }
     }
 }
 

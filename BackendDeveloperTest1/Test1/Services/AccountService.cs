@@ -15,12 +15,14 @@ namespace Test1.Services
         private readonly IRepository<Account> _repository;
         private readonly ISessionFactory _sessionFactory;
         private readonly IReadOnlyRepository<Location> _readOnlyRepository;
+        private readonly IMemberRepository _memberRepository;
 
-        public AccountService(IRepository<Account> accountRepository, ISessionFactory session, IReadOnlyRepository<Location> readOnlyRepository)
+        public AccountService(IRepository<Account> accountRepository, ISessionFactory session, IReadOnlyRepository<Location> readOnlyRepository, IMemberRepository memberRepository)
         {
             _repository = accountRepository;
             _sessionFactory = session;
             _readOnlyRepository = readOnlyRepository;
+            _memberRepository = memberRepository;
         }
 
         public async Task<bool> CreateAccountAsync(AccountCreateDto accountCreateDto, CancellationToken cancellationToken)
@@ -70,6 +72,24 @@ namespace Test1.Services
                 return deleted;
             }
             catch
+            {
+                dbContext.Rollback();
+                throw;
+            }
+        }
+
+        public async Task<bool> DeleteNonPrimaryMembersAsync(Guid id, CancellationToken cancellationToken)
+        {
+            await using var dbContext = await _sessionFactory.CreateContextAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+            try
+            {
+                bool deleted = await _memberRepository.DeleteNonPrimaryMembersAsyncByAccount(id, dbContext);
+                dbContext.Commit();
+                return deleted;
+            }
+            catch (Exception)
             {
                 dbContext.Rollback();
                 throw;
