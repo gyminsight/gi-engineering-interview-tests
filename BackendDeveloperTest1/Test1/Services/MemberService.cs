@@ -76,6 +76,27 @@ namespace Test1.Services
 
             try
             {
+                var currentMember = await _repositoryMember.GetByIdAsync(Guid, dbContext);
+
+                bool canDelete = await _repositoryMember.LastAccountMemberValidation(currentMember.AccountGuid, dbContext);
+
+                if (!canDelete)
+                {
+                    throw new LastAccountMemberException("Cannot delete the last member of the account.");
+                }
+
+                if (currentMember != null && currentMember.Primary) 
+                {
+                    var members = await _repositoryMember.GetAllMembersByAccountAsync(currentMember.AccountGuid, dbContext);
+                    var anotherMember = members.Where(m => m.Guid != Guid);
+                    if (anotherMember.Any())
+                    {
+                        var newPrimaryMember = anotherMember.First();
+                        newPrimaryMember.Primary = true;
+                        await _repositoryMember.UpdateAsync(newPrimaryMember.Guid,newPrimaryMember, dbContext);
+                    }
+                }
+
                 var deleted = await _repositoryMember.DeleteAsync(Guid, dbContext);
                 dbContext.Commit();
                 return deleted;

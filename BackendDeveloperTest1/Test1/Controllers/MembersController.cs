@@ -89,13 +89,21 @@ namespace Test1.Controllers
         [HttpDelete("{gUid:guid}")]
         public async Task<ActionResult> DeleteById(Guid gUid, CancellationToken cancellationToken)
         {
-            var deleted = await _memberService.DeleteMemberAsync(gUid, cancellationToken);
-            if (!deleted)
+            try
             {
-                return NotFound();
+                var deleted = await _memberService.DeleteMemberAsync(gUid, cancellationToken);
+                if (!deleted)
+                {
+                    return NotFound();
+                }
+
+                return NoContent();
+            }
+            catch (LastAccountMemberException ex)
+            {
+                return BadRequest(ex.Message);
             }
 
-            return NoContent();
         }
     }
 }

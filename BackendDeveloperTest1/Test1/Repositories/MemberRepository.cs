@@ -100,7 +100,7 @@ namespace Test1.Repositories
                               SET   AccountUid = @AccountUid,
                                     LocationUid = @LocationUid,
                                     UpdatedUtc = @UpdatedUtc,
-                                    Primary = @Primary,
+                                    'Primary' = @Primary,
                                     JoinedDateUtc = @JoinedDateUtc,
                                     CancelDateUtc = @CancelDateUtc,
                                     FirstName = @FirstName,
@@ -128,7 +128,7 @@ namespace Test1.Repositories
                 entity.Locale,
                 entity.PostalCode,
                 entity.Cancelled,
-                entity.Guid
+                gUid
             });
 
             var affectedRows = await dbContext.Session.ExecuteAsync(template.RawSql, template.Parameters, dbContext.Transaction)
@@ -201,7 +201,7 @@ namespace Test1.Repositories
 
             var template = builder.AddTemplate(sql);
 
-            builder.Where("Guid = @gUid", new
+            builder.Where("m.Guid = @Guid", new
             {
                 Guid = gUid
             });
@@ -214,55 +214,16 @@ namespace Test1.Repositories
 
         public async Task<bool> ExistingPrimaryMemberByAccountValidation(Guid accountGuid, DapperDbContext dbContext)
         {
-            Member member;
-            const string sql = @"SELECT m.Uid,
-                                        m.Guid,
-                                        a.Guid AS AccountGuid,
-                                        m.'Primary'
+            var members = await GetAllMembersByAccountAsync(accountGuid, dbContext);
 
-                                    FROM member m
-                              INNER JOIN account a ON a.Uid = m.AccountUid
-                                   WHERE AccountGuid = @accountGuid AND m.'Primary' = 1";
-
-            var builder = new SqlBuilder();
-
-            var template = builder.AddTemplate(sql);
-
-            builder.Where("AccountGuid = @accountGuid", new
-            {
-                accountGuid = accountGuid
-            });
-
-            member = await dbContext.Session.QueryFirstOrDefaultAsync<Member>(template.RawSql, template.Parameters, dbContext.Transaction)
-                .ConfigureAwait(false);
-
-            return member != null;
+            return members.Any(m => m.Primary);
         }
 
         public async Task<bool> LastAccountMemberValidation(Guid accountGuid, DapperDbContext dbContext)
         {
-            Member member;
-            const string sql = @"SELECT m.Uid,
-                                        m.Guid,
-                                        a.Guid AS AccountGuid
+            var members = await GetAllMembersByAccountAsync(accountGuid, dbContext);
 
-                                    FROM member m
-                             INNER JOIN account a ON a.Uid = m.AccountUid
-                                   WHERE AccountGuid = @accountGuid";
-
-            var builder = new SqlBuilder();
-
-            var template = builder.AddTemplate(sql);
-
-            builder.Where("AccountGuid = @accountGuid", new
-            {
-                accountGuid = accountGuid
-            });
-
-            member = await dbContext.Session.QueryFirstOrDefaultAsync<Member>(template.RawSql, template.Parameters, dbContext.Transaction)
-                .ConfigureAwait(false);
-
-            return member != null;
+            return members.Count() > 1;
         }
 
         public async Task<IEnumerable<Member>> GetAllMembersByAccountAsync(Guid accountId, DapperDbContext dbContext)
@@ -273,6 +234,8 @@ namespace Test1.Repositories
                                         m.Guid,
                                         a.Guid AS AccountGuid,
                                         l.Guid AS LocationGuid,
+                                        m.AccountUid,
+                                        m.LocationUid,
                                         m.CreatedUtc,
                                         m.UpdatedUtc,
                                         m.'Primary',
@@ -292,7 +255,7 @@ namespace Test1.Repositories
 
             var builder = new SqlBuilder();
 
-            builder.Where("AccountUid = @gUid", new
+            builder.Where("a.Guid = @id", new
             {
                 id = accountId
             });
