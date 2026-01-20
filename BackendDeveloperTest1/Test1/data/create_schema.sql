@@ -21,6 +21,7 @@ CREATE TABLE "location" (
 CREATE TABLE "account" (
   "UID" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
   "LocationUid" int unsigned NOT NULL,
+  /* Condisider Adding Unique Constraint on Guid */
   "Guid" char(36) NOT NULL,
   "CreatedUtc" datetime NOT NULL,
   "UpdatedUtc" datetime DEFAULT NULL,
@@ -36,6 +37,7 @@ CREATE TABLE "account" (
   FOREIGN KEY("LocationUid") REFERENCES location("UID")
 );
 
+/* Consider adding an index on AccountUid in the member table to speed up queries */
 CREATE TABLE "member" (
   "UID" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
   "Guid" char(36) NOT NULL,

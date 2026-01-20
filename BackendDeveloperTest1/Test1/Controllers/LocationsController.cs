@@ -7,6 +7,8 @@ using Test1.Core;
 using Test1.Models;
 
 
+
+
 namespace Test1.Controllers
 {
     [ApiController] 
@@ -27,26 +29,43 @@ namespace Test1.Controllers
             await using var dbContext = await _sessionFactory.CreateContextAsync(cancellationToken)
                 .ConfigureAwait(false);
 
-            const string sql = @"
+
+                var cancelledStatus = (int)AccountStatusType.CANCELLED;
+
+//Task 7: I recommend sql in repository pattern for better separation of concerns and easier unit testing.
+const string sql = @"
 SELECT
-    Guid,
-    Name,
-    Address,
-    City,
-    Locale,
-    PostalCode
-FROM location;";
+    l.Guid,
+    l.Name,
+    l.Address,
+    l.City,
+    l.Locale,
+    l.PostalCode,
+    COUNT(a.UID) AS ActiveAccountsCount
+FROM location l
+LEFT JOIN account a
+    ON l.UID = a.LocationUid
+    AND a.Status < @Cancelled
+GROUP BY 
+    l.Guid,
+    l.Name,
+    l.Address,
+    l.City,
+    l.Locale,
+    l.PostalCode;";
 
             var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(sql);
 
-            var rows = await dbContext.Session.QueryAsync<LocationDto>(template.RawSql, template.Parameters, dbContext.Transaction)
-                .ConfigureAwait(false);
+             var rows = await dbContext.Session.QueryAsync<LocationDto>(
+        sql,
+        new { Cancelled = cancelledStatus },
+        dbContext.Transaction
+    ).ConfigureAwait(false);
 
-            dbContext.Commit();
-
-            return Ok(rows); // Returns an HTTP 200 OK status with the data
+    dbContext.Commit();
+    return Ok(rows);
         }
 
         // GET: api/locations/{Guid}
@@ -178,6 +197,9 @@ INSERT INTO location (
             public string City {get;set;}
             public string Locale {get;set;}
             public string PostalCode {get;set;}
+
+            // GI-Interview-Test Task 2: Add ActiveAccountsCount
+            public int ActiveAccountsCount {get;set;}
         }
     }
 }
