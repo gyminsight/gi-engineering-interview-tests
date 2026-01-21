@@ -15,6 +15,8 @@ Verify your endpoints work by using Postman (https://www.postman.com/downloads/)
 
 ## Tasks to complete
 
+**NOTE: Complete as many of the tasks as you can. We will accept partially completed tasks.**
+
 1. Create an accounts controller with list, create, read, update and delete endpoints.
 2. Enhance the location's list endpoint to return the number of non-cancelled accounts (where the `account.Status` < [CANCELLED](Test1/Models/AccountStatusType.cs)) for each location.
 3. Add an endpoint to the accounts controller that will return all members for a specified account (using the account's Guid)
@@ -24,3 +26,4 @@ Verify your endpoints work by using Postman (https://www.postman.com/downloads/)
 5. Add an endpoint to the accounts controller that will delete all members of a specified account except the "primary" member.
 6. Document any recommendations on table indexes.
 7. Document any recommendations on improving the structure or maintainability of the code.
+
