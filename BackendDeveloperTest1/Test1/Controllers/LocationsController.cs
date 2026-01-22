@@ -5,11 +5,14 @@ using Dapper;
 using Test1.Contracts;
 using Test1.Core;
 using Test1.Models;
+using Test1.Dtos;
+using System.Transactions;
+using SQLitePCL;
 
 
 namespace Test1.Controllers
 {
-    [ApiController] 
+    [ApiController]
     [Route("api/[controller]")]
     public class LocationsController : ControllerBase
     {
@@ -23,26 +26,47 @@ namespace Test1.Controllers
         // GET: api/locations
         [HttpGet]
         public async Task<ActionResult<IEnumerable<LocationDto>>> List(CancellationToken cancellationToken)
-        {
+        {   
+            //Recommendation: Instead of creating a dbContext, we can create an Isession using .CreateSessionAsync to avoid unecessary transactions
             await using var dbContext = await _sessionFactory.CreateContextAsync(cancellationToken)
                 .ConfigureAwait(false);
 
             const string sql = @"
 SELECT
-    Guid,
-    Name,
-    Address,
-    City,
-    Locale,
-    PostalCode
-FROM location;";
+    l.Guid,
+    l.Name,
+    l.Address,
+    l.City,
+    l.Locale,
+    l.PostalCode,
+    COUNT(
+        CASE 
+            WHEN a.Status IS NOT NULL AND a.Status < @Inactive 
+            THEN 1 
+        END
+        ) AS ActiveCount
+FROM location l
+LEFT JOIN account a ON a.LocationUid = l.UID
+GROUP BY
+    l.UID,
+    l.Guid,
+    l.Name,
+    l.Address,
+    l.City,
+    l.Locale,
+    l.PostalCode
+;";
 
+            //Recommendation: SqlBuilder Unnecessary here
             var builder = new SqlBuilder();
 
-            var template = builder.AddTemplate(sql);
+            var template = builder.AddTemplate(sql, new
+            {
+                Inactive = AccountStatusType.CANCELLED
+            });
 
-            var rows = await dbContext.Session.QueryAsync<LocationDto>(template.RawSql, template.Parameters, dbContext.Transaction)
-                .ConfigureAwait(false);
+            var rows = await dbContext.Session.QueryAsync<LocationWithActiveCountDto>(template.RawSql, template.Parameters, dbContext.Transaction
+            ).ConfigureAwait(false);
 
             dbContext.Commit();
 
@@ -67,6 +91,7 @@ SELECT
 FROM location
 /**where**/;";
 
+            //Recommendation: Sql builder makes sense here for additional filtering in the future
             var builder = new SqlBuilder();
 
             var template = builder.AddTemplate(sql);
@@ -76,11 +101,13 @@ FROM location
                 Guid = id
             });
 
+            //Recommendation: Query FirstOrDefault for single resource
             var rows = await dbContext.Session.QueryAsync<LocationDto>(template.RawSql, template.Parameters, dbContext.Transaction)
                 .ConfigureAwait(false);
 
             dbContext.Commit();
 
+            //Recommendation: Return error code if resource not found
             return Ok(rows.FirstOrDefault()); // Returns an HTTP 200 OK status with the data
         }
 
@@ -170,14 +197,14 @@ INSERT INTO location (
                 return BadRequest("Unable to delete location");
         }
 
-        public class LocationDto 
+        public class LocationDto
         {
-            public Guid Guid {get;set;}
-            public string Name {get;set;}
-            public string Address {get;set;}
-            public string City {get;set;}
-            public string Locale {get;set;}
-            public string PostalCode {get;set;}
+            public Guid Guid { get; set; }
+            public string Name { get; set; }
+            public string Address { get; set; }
+            public string City { get; set; }
+            public string Locale { get; set; }
+            public string PostalCode { get; set; }
         }
     }
 }
