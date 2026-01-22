@@ -35,3 +35,6 @@ app.UseHttpsRedirection();
 app.MapControllers(); 
 
 app.Run();
+
+
+// location should be attached to accounts: if an account can be used at multiple locations, then accounts should not be attached to location
