@@ -1,6 +1,7 @@
 using Test1.Contracts;
 using Test1.Core;
 using Serilog;
+using Test1.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,8 +18,12 @@ builder.Services.AddControllers()
 builder.Services.AddOpenApi();
 
 builder.Services.AddTransient<ISessionFactory, SqliteSessionFactory>();
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 Dapper.SqlMapper.RemoveTypeMap(typeof(Guid));
 Dapper.SqlMapper.AddTypeHandler(MySqlGuidTypeHandler.Default);
+
+
 
 var app = builder.Build();
 
