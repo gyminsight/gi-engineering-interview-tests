@@ -6,10 +6,9 @@ using Test1.Contracts;
 using Test1.Core;
 using Test1.Models;
 
-
 namespace Test1.Controllers
 {
-    [ApiController] 
+    [ApiController]
     [Route("api/[controller]")]
     public class LocationsController : ControllerBase
     {
@@ -29,17 +28,23 @@ namespace Test1.Controllers
 
             const string sql = @"
 SELECT
-    Guid,
-    Name,
-    Address,
-    City,
-    Locale,
-    PostalCode
-FROM location;";
+    l.Guid,
+    l.Name,
+    l.Address,
+    l.City,
+    l.Locale,
+    l.PostalCode,
+    COUNT(CASE WHEN a.Status < @CancelledStatus THEN 1 END) As AccountCount
+FROM location l
+LEFT JOIN account a ON l.UID = a.LocationUid
+GROUP BY l.UID, l.Guid, l.Name, l.Address, l.City, l.Locale, l.PostalCode;";
 
             var builder = new SqlBuilder();
 
-            var template = builder.AddTemplate(sql);
+            var template = builder.AddTemplate(sql, new
+            {
+                CancelledStatus = (int)AccountStatusType.CANCELLED
+            });
 
             var rows = await dbContext.Session.QueryAsync<LocationDto>(template.RawSql, template.Parameters, dbContext.Transaction)
                 .ConfigureAwait(false);
@@ -170,14 +175,15 @@ INSERT INTO location (
                 return BadRequest("Unable to delete location");
         }
 
-        public class LocationDto 
+        public class LocationDto
         {
-            public Guid Guid {get;set;}
-            public string Name {get;set;}
-            public string Address {get;set;}
-            public string City {get;set;}
-            public string Locale {get;set;}
-            public string PostalCode {get;set;}
+            public Guid Guid { get; set; }
+            public string Name { get; set; }
+            public string Address { get; set; }
+            public string City { get; set; }
+            public string Locale { get; set; }
+            public string PostalCode { get; set; }
+            public int AccountCount { get; set; }
         }
     }
 }
