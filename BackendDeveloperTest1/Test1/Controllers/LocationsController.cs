@@ -27,15 +27,21 @@ namespace Test1.Controllers
             await using var dbContext = await _sessionFactory.CreateContextAsync(cancellationToken)
                 .ConfigureAwait(false);
 
-            const string sql = @"
-SELECT
-    Guid,
-    Name,
-    Address,
-    City,
-    Locale,
-    PostalCode
-FROM location;";
+            const string sql = @" SELECT    l.Guid,
+                                            l.Name,
+                                            l.Address,
+                                            l.City,
+                                            l.Locale,
+                                            l.PostalCode,
+                                            l.UID,
+                                            SUM(CASE WHEN a.Status < 3 THEN 1 ELSE 0 END) AS NonCancelledAccounts
+
+                                            FROM location l
+                                            LEFT JOIN account a ON a.LocationUid = l.UID
+
+                                            GROUP BY
+                                            l.UID,
+                                            l.Name;";
 
             var builder = new SqlBuilder();
 
@@ -178,6 +184,7 @@ INSERT INTO location (
             public string City {get;set;}
             public string Locale {get;set;}
             public string PostalCode {get;set;}
+            public int NonCancelledAccounts {get;set; }
         }
     }
 }

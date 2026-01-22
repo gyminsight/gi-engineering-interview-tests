@@ -1,6 +1,10 @@
 using Test1.Contracts;
 using Test1.Core;
 using Serilog;
+using Test1.Interfaces;
+using Test1.Services;
+using Test1.Repositories;
+using Test1.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +23,13 @@ builder.Services.AddOpenApi();
 builder.Services.AddTransient<ISessionFactory, SqliteSessionFactory>();
 Dapper.SqlMapper.RemoveTypeMap(typeof(Guid));
 Dapper.SqlMapper.AddTypeHandler(MySqlGuidTypeHandler.Default);
+
+//Registering my own interfaces-classes
+builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IRepository<Account>, AccountRepository>();
+builder.Services.AddScoped<IMemberService, MemberService>();
+builder.Services.AddScoped<IReadOnlyRepository<Location>, LocationRepository>();
+builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 
 var app = builder.Build();
 
